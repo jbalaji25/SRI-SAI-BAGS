@@ -38,6 +38,7 @@ const productSchema = new mongoose.Schema({
     height: { type: Number },
     depth: { type: Number },
     priority: { type: Number, default: 999 },
+    customizable: { type: Boolean, default: false },
     features: [{ type: String }],
     insideImages: [{ type: String }],
 }, { timestamps: true });

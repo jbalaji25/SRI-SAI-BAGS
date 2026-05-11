@@ -139,22 +139,23 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, currentUser, onLo
           style={{ cursor: 'pointer' }}
           className="brand-wrapper"
         >
+          <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '50px', width: 'auto' }} />
           <span className="brand-sri-sai">SRI SAI</span>
-          <span className="brand-gifts">gifts</span>
+          <span className="brand-gifts">bags</span>
         </div>
 
         <div className="nav-links">
           <a href="#home" className="nav-link" onClick={onHomeClick}>Home</a>
           <a href="#products" className="nav-link" onClick={(e) => { e.preventDefault(); onProductsClick && onProductsClick(); }}>Products</a>
           <a href="#about" className="nav-link">About</a>
+          <a href="#catalogue" className="nav-link">Catalogue</a>
           <a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); onContactClick && onContactClick(); }}>Contact</a>
         </div>
 
         <div className="nav-actions">
           <div className="desktop-actions">
-            <Search className="action-icon" size={20} />
             <div onClick={onWishlistClick} style={{ position: 'relative', cursor: 'pointer' }}>
-              <Heart className="action-icon" size={20} style={{ color: likedCount > 0 ? '#ef4444' : 'white' }} />
+              <Heart className="action-icon" size={20} style={{ color: likedCount > 0 ? '#ef4444' : '#0f172a' }} />
               {likedCount > 0 && <span className="cart-badge" style={{ background: '#ef4444' }}>{likedCount}</span>}
             </div>
             <div onClick={onCartClick} style={{ position: 'relative', cursor: 'pointer' }}>
@@ -190,12 +191,12 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, currentUser, onLo
           <a href="#home" className="nav-link" onClick={() => { onHomeClick(); setIsMenuOpen(false); }}>Home</a>
           <a href="#products" className="nav-link" onClick={(e) => { e.preventDefault(); onProductsClick && onProductsClick(); setIsMenuOpen(false); }}>Products</a>
           <a href="#about" className="nav-link" onClick={() => setIsMenuOpen(false)}>About</a>
+          <a href="#catalogue" className="nav-link" onClick={() => setIsMenuOpen(false)}>Catalogue</a>
           <a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); onContactClick && onContactClick(); setIsMenuOpen(false); }}>Contact</a>
           <div className="mobile-menu-actions">
             <div style={{ display: 'flex', gap: '24px', marginBottom: '24px' }}>
-              <Search className="action-icon" size={24} />
               <div onClick={() => { onWishlistClick(); setIsMenuOpen(false); }} style={{ position: 'relative' }}>
-                <Heart className="action-icon" size={24} style={{ color: likedCount > 0 ? '#ef4444' : 'white' }} />
+                <Heart className="action-icon" size={24} style={{ color: likedCount > 0 ? '#ef4444' : '#0f172a' }} />
                 {likedCount > 0 && <span className="cart-badge" style={{ background: '#ef4444' }}>{likedCount}</span>}
               </div>
               <div onClick={() => { onCartClick(); setIsMenuOpen(false); }} style={{ position: 'relative' }}>
@@ -471,22 +472,58 @@ const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     {
-      image: '/images/hero_red.png',
-      subtitle: 'Premium Promotional Gifts',
-      title: 'Corporate Excellence',
-      description: 'Strengthen your brand with high-quality custom merchandise.'
+      image: '/images/hero_bags_travel.png',
+      subtitle: 'Bags & Travel Accessories',
+      title: 'Travel in Style',
+      description: 'Laptop bags, jute totes, wallets & umbrellas — perfect branded travel companions.'
     },
     {
-      image: '/images/hero_jewelry.png',
-      subtitle: 'Office Essentials',
-      title: 'Branded Stationery',
-      description: 'Professional supplies tailored for your company\'s identity.'
+      image: '/images/hero_office_desktop.png',
+      subtitle: 'Office & Desktop Accessories',
+      title: 'Desk Essentials',
+      description: 'Pen stands, desk clocks, mobile stands & clipboards — elevate every workspace.'
     },
     {
-      image: '/images/hero_watch.png',
-      subtitle: 'Digital Solutions',
-      title: 'Modern Mobile Stands',
-      description: 'Innovative desk accessories that keep you connected.'
+      image: '/images/hero_writing_stationery.png',
+      subtitle: 'Writing & Stationery',
+      title: 'Write with Purpose',
+      description: 'Premium pens, designer notebooks, diaries & card holders for the discerning professional.'
+    },
+    {
+      image: '/images/hero_tech_electronics.png',
+      subtitle: 'Tech & Electronic Accessories',
+      title: 'Smart Tech Gifts',
+      description: 'Power banks, speakers, USB pendrives & charging stands for the modern professional.'
+    },
+    {
+      image: '/images/hero_drinkware_kitchen.png',
+      subtitle: 'Drinkware & Kitchen Items',
+      title: 'Sip in Style',
+      description: 'Custom bottles, ceramic mugs, hip flasks & bar sets — gifts they\'ll cherish daily.'
+    },
+    {
+      image: '/images/hero_home_decor.png',
+      subtitle: 'Home Decor & Decorative Items',
+      title: 'Decorate with Grace',
+      description: 'Photo frames, aroma candles, flower vases & show pieces for beautiful spaces.'
+    },
+    {
+      image: '/images/hero_lighting_products.png',
+      subtitle: 'Lighting Products',
+      title: 'Brighten Every Moment',
+      description: 'Solar lamps, rechargeable touch lamps & stylish torches — illuminate your brand.'
+    },
+    {
+      image: '/images/hero_keychains_accessories.png',
+      subtitle: 'Keychains & Small Accessories',
+      title: 'Small Yet Memorable',
+      description: 'Premium metal keychains, key rings & hangers — compact gifts with big impact.'
+    },
+    {
+      image: '/images/hero_gift_sets.png',
+      subtitle: 'Gift Sets',
+      title: 'Premium Gift Sets',
+      description: 'Executive gift sets, festive hampers & luxury combos — the art of gifting, perfected.'
     }
   ];
 
@@ -1084,15 +1121,22 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
           className="product-card-image"
         />
 
-        <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 2 }}>
           {discountPercent > 0 && (
             <div style={{ background: '#dcfce7', color: '#16a34a', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '800', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
               {discountPercent}% OFF
             </div>
           )}
         </div>
+        <div style={{ position: 'absolute', top: '16px', right: '60px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 2 }}>
+          {product.customizable && (
+            <div style={{ background: '#fef08a', color: '#b45309', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '800', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+              CUSTOMIZABLE
+            </div>
+          )}
+        </div>
 
-        <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
+        <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 2 }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -1112,20 +1156,15 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
         )}
       </div>
 
-      <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-          <Star size={16} color="#f59e0b" fill="#f59e0b" />
-          <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#334155' }}>{product.ratings || 4.8}</span>
-          <span style={{ fontSize: '0.875rem', color: '#94a3b8' }}>(124 reviews)</span>
-        </div>
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
 
-        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '16px', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '3.5rem' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '2.8rem' }}>
           {product.name || "Untitled Product"}
         </h3>
 
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
           {tags.map((tag, i) => (
-            <span key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '500' }}>
+            <span key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '500' }}>
               {tag}
             </span>
           ))}
@@ -1144,46 +1183,48 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '24px', marginTop: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '12px', marginTop: 'auto' }}>
           <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>₹{product.price || 0}</span>
           {comparePrice > product.price && (
             <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through', marginBottom: '3px' }}>₹{comparePrice}</span>
           )}
         </div>
 
-        <button
-          style={{ width: '100%', borderRadius: '8px', padding: '14px', background: '#f59e0b', color: 'white', border: 'none', fontWeight: '600', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: inStock ? 1 : 0.5, cursor: inStock ? 'pointer' : 'not-allowed', transition: 'background-color 0.2s', marginBottom: '12px' }}
-          onMouseOver={(e) => inStock && (e.currentTarget.style.backgroundColor = '#d97706')}
-          onMouseOut={(e) => inStock && (e.currentTarget.style.backgroundColor = '#f59e0b')}
-          disabled={!inStock}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (inStock && onCartClick) onCartClick(product, 1);
-          }}
-        >
-          {inStock ? (
-            <>
-              <ShoppingCart size={20} /> Add to Cart
-            </>
-          ) : (
-            'Out of Stock'
-          )}
-        </button>
-        <button
-          style={{ width: '100%', borderRadius: '8px', padding: '14px', background: '#25D366', color: 'white', border: 'none', fontWeight: '600', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#128C7E')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#25D366')}
-          onClick={(e) => {
-            e.stopPropagation();
-            const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image Link:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
-            window.open(`https://wa.me/919999999999?text=${encodeURIComponent(message)}`, '_blank'); 
-          }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M12.01 2.01a10.003 10.003 0 0 0-8.52 15.28L2 22l4.87-1.46A9.957 9.957 0 0 0 12.01 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm.01 18.25c-1.63 0-3.19-.43-4.57-1.25l-3.26.98.98-3.21C4.4 15.42 4.02 13.78 4.02 12A8.01 8.01 0 0 1 12.02 4c4.41 0 8 3.59 8 8s-3.59 8-8 8zm4.33-5.59c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.61.77-.75.93-.14.16-.28.18-.52.06a6.52 6.52 0 0 1-1.92-1.19c-.58-.51-1.02-1.15-1.14-1.39-.12-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.23-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42H8.72c-.16 0-.41.06-.62.3-.21.24-.81.79-.81 1.93 0 1.14.83 2.24.94 2.4.11.16 1.63 2.49 3.96 3.5.55.24 1.05.39 1.48.5.55.15 1.06.13 1.46.08.45-.06 1.4-.57 1.6-1.13.2-.56.2-.104.14-.114-.06-.02-.22-.06-.46-.18z" />
-          </svg>
-          WhatsApp Enquiry
-        </button>
+        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+          <button
+            style={{ flex: 1, borderRadius: '8px', padding: '10px 4px', background: '#f59e0b', color: 'white', border: 'none', fontWeight: '600', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', opacity: inStock ? 1 : 0.5, cursor: inStock ? 'pointer' : 'not-allowed', transition: 'background-color 0.2s' }}
+            onMouseOver={(e) => inStock && (e.currentTarget.style.backgroundColor = '#d97706')}
+            onMouseOut={(e) => inStock && (e.currentTarget.style.backgroundColor = '#f59e0b')}
+            disabled={!inStock}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (inStock && onCartClick) onCartClick(product, 1);
+            }}
+          >
+            {inStock ? (
+              <>
+                <ShoppingCart size={16} /> Add to Cart
+              </>
+            ) : (
+              'Out of Stock'
+            )}
+          </button>
+          <button
+            style={{ flex: 1, borderRadius: '8px', padding: '10px 4px', background: '#25D366', color: 'white', border: 'none', fontWeight: '600', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#128C7E')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#25D366')}
+            onClick={(e) => {
+              e.stopPropagation();
+              const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image Link:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
+              window.open(`https://wa.me/918883888907?text=${encodeURIComponent(message)}`, '_blank'); 
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12.01 2.01a10.003 10.003 0 0 0-8.52 15.28L2 22l4.87-1.46A9.957 9.957 0 0 0 12.01 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm.01 18.25c-1.63 0-3.19-.43-4.57-1.25l-3.26.98.98-3.21C4.4 15.42 4.02 13.78 4.02 12A8.01 8.01 0 0 1 12.02 4c4.41 0 8 3.59 8 8s-3.59 8-8 8zm4.33-5.59c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.61.77-.75.93-.14.16-.28.18-.52.06a6.52 6.52 0 0 1-1.92-1.19c-.58-.51-1.02-1.15-1.14-1.39-.12-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.23-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42H8.72c-.16 0-.41.06-.62.3-.21.24-.81.79-.81 1.93 0 1.14.83 2.24.94 2.4.11.16 1.63 2.49 3.96 3.5.55.24 1.05.39 1.48.5.55.15 1.06.13 1.46.08.45-.06 1.4-.57 1.6-1.13.2-.56.2-.104.14-.114-.06-.02-.22-.06-.46-.18z" />
+            </svg>
+            WhatsApp
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -1226,7 +1267,7 @@ const FeaturedProducts = ({ products, loading, onProductClick, onCategoryClick, 
   }
 
   return (
-    <section className="section-padding" id="new-arrivals" style={{ backgroundColor: 'var(--bg-light)' }}>
+    <section className="section-padding collection-bg" id="new-arrivals">
       <div className="container">
         {categories.map((category) => {
           const knownCategoryNames = Object.keys(categoryStructure);
@@ -1259,8 +1300,8 @@ const FeaturedProducts = ({ products, loading, onProductClick, onCategoryClick, 
             <div key={category} style={{ marginBottom: '64px' }}>
               <div className="section-header">
                 <div>
-                  <span className="text-primary font-bold uppercase tracking-widest" style={{ fontSize: '0.875rem', marginBottom: '8px', display: 'block' }}>Collections</span>
-                  <h2 style={{ fontSize: '2rem' }}>{category}</h2>
+                  <span className="font-bold uppercase tracking-widest" style={{ fontSize: '0.875rem', marginBottom: '8px', display: 'block', color: 'var(--accent)' }}>Collections</span>
+                  <h2 style={{ fontSize: '2rem', color: 'white' }}>{category}</h2>
                 </div>
                 {hasMore && (
                   <button
@@ -1543,9 +1584,9 @@ const CategoryPage = ({ category, products, loading, onProductClick, onBack, onL
     });
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)', paddingTop: '100px' }}>
+    <div className="collection-bg" style={{ minHeight: '100vh', paddingTop: '100px' }}>
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '60px 0 40px' }}>
+      <div style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(245,158,11,0.15)', padding: '60px 0 40px' }}>
         <div className="container">
           <button
             onClick={onBack}
@@ -1847,7 +1888,7 @@ const ContactPage = ({ onBack }) => {
             {/* Google Map Embed */}
             <div style={{ borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
               <iframe
-                title="SRI SAI gifts Showroom – Pasumalai, Madurai"
+                title="SRI SAI bags Showroom – Pasumalai, Madurai"
                 src="https://maps.google.com/maps?q=Thiruparankundram,+Madurai&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="290"
@@ -1868,7 +1909,7 @@ const ContactPage = ({ onBack }) => {
                 <MapPin size={24} color="#f59e0b" />
               </div>
               <div>
-                <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.15rem', marginBottom: '8px' }}>SRI SAI gifts Showroom</h3>
+                <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.15rem', marginBottom: '8px' }}>SRI SAI bags Showroom</h3>
                 <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>49, GST Road, Pasumalai</p>
                 <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Madurai – 625 004, Tamil Nadu</p>
               </div>
@@ -1959,7 +2000,10 @@ const Footer = ({ onHomeClick, onProductsClick, onContactClick }) => {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <div className="brand-sri-sai" style={{ fontSize: '1.5rem', marginBottom: '8px' }}>SRI SAI <span style={{ fontWeight: 400, fontSize: '0.875rem' }}>gifts</span></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '40px', width: 'auto' }} />
+              <div className="brand-sri-sai" style={{ fontSize: '1.5rem' }}>SRI SAI <span style={{ fontWeight: 400, fontSize: '0.875rem' }}>bags</span></div>
+            </div>
             <p style={{ color: '#94a3b8', marginBottom: '32px' }}>
               Your boutique destination for luxury gifts and exquisite accessories. Crafted with passion, delivered with love.
             </p>
@@ -2009,7 +2053,7 @@ const Footer = ({ onHomeClick, onProductsClick, onContactClick }) => {
           </div>
         </div>
         <div style={{ borderTop: '1px solid #334155', paddingTop: '32px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', color: '#94a3b8', fontSize: '0.875rem' }}>
-          <p>© 2024 SRI SAI gifts. All rights reserved.</p>
+          <p>© 2024 SRI SAI bags. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '24px' }}>
             <a href="#" className="footer-link">Privacy Policy</a>
             <a href="#" className="footer-link">Terms of Service</a>
@@ -2733,15 +2777,27 @@ const AdminDashboard = ({ onLogout, products, setProducts }) => {
                           })()}
                         </select>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', height: '100%', paddingTop: '28px' }}>
-                        <input
-                          type="checkbox"
-                          id="inStockCheckbox"
-                          checked={(editingProduct.stock ?? 50) > 0}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.checked ? 50 : 0 })}
-                          style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                        />
-                        <label htmlFor="inStockCheckbox" style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Available In Stock</label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center', paddingTop: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            type="checkbox"
+                            id="inStockCheckbox"
+                            checked={(editingProduct.stock ?? 50) > 0}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.checked ? 50 : 0 })}
+                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                          />
+                          <label htmlFor="inStockCheckbox" style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Available In Stock</label>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            type="checkbox"
+                            id="customizableCheckbox"
+                            checked={!!editingProduct.customizable}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, customizable: e.target.checked })}
+                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                          />
+                          <label htmlFor="customizableCheckbox" style={{ fontSize: '0.875rem', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Customizable Product</label>
+                        </div>
                       </div>
                     </div>
 
@@ -3163,7 +3219,7 @@ const ProductsPage = ({ products, currentUser, onProductClick, onCartClick, onLi
                           onClick={(e) => {
                             e.stopPropagation();
                             const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image Link:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
-                            window.open(`https://wa.me/919999999999?text=${encodeURIComponent(message)}`, '_blank'); 
+                            window.open(`https://wa.me/918883888907?text=${encodeURIComponent(message)}`, '_blank'); 
                           }}
                           style={{
                             width: '100%', borderRadius: '8px', padding: '12px', background: '#25D366', color: 'white',
