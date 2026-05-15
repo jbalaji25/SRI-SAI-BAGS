@@ -1632,7 +1632,7 @@ const WishlistPage = ({ products, currentUser, loading, onProductClick, onBack, 
   );
 };
 
-const CartPage = ({ products, currentUser, loading, onProductClick, onBack, onRemoveCartItem, onUpdateCartQty }) => {
+const CartPage = ({ products, currentUser, loading, onProductClick, onBack, onRemoveCartItem, onUpdateCartQty, onCheckout }) => {
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, []);
 
   const cartItems = (currentUser?.cart || []).map(item => {
@@ -1716,7 +1716,7 @@ const CartPage = ({ products, currentUser, loading, onProductClick, onBack, onRe
                 </div>
               </div>
               {subtotal < 999 && <p style={{ fontSize: '0.78rem', color: '#92400e', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '8px 12px', marginBottom: '16px' }}>Add ₹{(999 - subtotal).toLocaleString()} more for FREE delivery!</p>}
-              <button onClick={() => alert('Proceeding to checkout...')} style={{ width: '100%', padding: '14px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', marginBottom: '10px' }}>Proceed to Checkout →</button>
+              <button onClick={() => onCheckout(cartItems)} style={{ width: '100%', padding: '14px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', marginBottom: '10px' }}>Proceed to Checkout →</button>
               <button onClick={onBack} style={{ width: '100%', padding: '11px', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '10px', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer' }}>Continue Shopping</button>
             </div>
           </div>
@@ -3827,6 +3827,41 @@ function App() {
     return true;
   };
 
+  const handleWhatsAppCheckout = (items) => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    if (items.length === 0) return;
+
+    const whatsappNumber = "918883888907";
+    let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
+    message += `*Customer Details:*\n`;
+    message += `Name: ${currentUser.fullName}\n`;
+    message += `Email: ${currentUser.email}\n\n`;
+    message += `*Order Items:*\n`;
+
+    let subtotal = 0;
+    items.forEach((item, index) => {
+      const itemTotal = item.product.price * item.quantity;
+      subtotal += itemTotal;
+      message += `${index + 1}. *${item.product.name}*\n`;
+      message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal}\n`;
+    });
+
+    const deliveryFee = subtotal >= 999 ? 0 : 99;
+    const total = subtotal + deliveryFee;
+
+    message += `\n*Order Summary:*\n`;
+    message += `Subtotal: ₹${subtotal.toLocaleString()}\n`;
+    message += `Delivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\n`;
+    message += `*Total Amount: ₹${total.toLocaleString()}*\n\n`;
+    message += `Hi! I would like to place this order. Please confirm and share payment details.`;
+
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   const goHome = () => {
     setSelectedProductView(null);
     setSelectedCategory(null);
@@ -3960,7 +3995,7 @@ function App() {
           onBack={() => setSelectedProductView(null)}
           onLikeClick={handleLikeClick}
           onCartClick={handleCartClick}
-          onBuyNowClick={(p, q) => handleActionClick('Buy Now', p) && alert('Redirecting to checkout...')}
+          onBuyNowClick={(p, q) => handleWhatsAppCheckout([{ product: p, quantity: q }])}
         />
       ) : isAboutPageActive ? (
         <AboutPage onBack={goHome} />
@@ -3975,6 +4010,7 @@ function App() {
           onBack={goHome}
           onRemoveCartItem={handleCartRemove}
           onUpdateCartQty={handleCartUpdateQty}
+          onCheckout={handleWhatsAppCheckout}
         />
       ) : isWishlistPageActive ? (
         <WishlistPage
