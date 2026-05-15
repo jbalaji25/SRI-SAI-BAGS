@@ -3835,11 +3835,18 @@ function App() {
 
     if (items.length === 0) return;
 
+    const deliveryAddress = window.prompt("Please enter your complete delivery address for shipping:");
+    if (!deliveryAddress || deliveryAddress.trim() === "") {
+      alert("Delivery address is required to proceed with the order.");
+      return;
+    }
+
     const whatsappNumber = "918883888907";
     let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
     message += `*Customer Details:*\n`;
     message += `Name: ${currentUser.fullName}\n`;
-    message += `Email: ${currentUser.email}\n\n`;
+    message += `Email: ${currentUser.email}\n`;
+    message += `*Delivery Address:* ${deliveryAddress}\n\n`;
     message += `*Order Items:*\n`;
 
     let subtotal = 0;
