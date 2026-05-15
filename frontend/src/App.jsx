@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { uploadImageToCloudinary } from './cloudinary';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import {
   Mail,
   Lock,
@@ -81,6 +81,187 @@ import {
   SlidersHorizontal,
   LayoutGrid
 } from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
+const cardVariants = {
+  offHover: (angle) => ({
+    rotateY: angle,
+    z: 60,
+    opacity: 0.9,
+    scale: 1,
+    zIndex: 30,
+    transition: {
+      type: "spring",
+      mass: 3,
+      stiffness: 400,
+      damping: 50
+    }
+  }),
+  onHover: (hoverScale) => ({
+    rotateY: 0,
+    z: 120,
+    opacity: 1,
+    scale: hoverScale,
+    zIndex: 50,
+    transition: {
+      type: "spring",
+      mass: 3,
+      stiffness: 400,
+      damping: 50
+    }
+  })
+};
+
+const AngledCard = ({
+  item,
+  angle,
+  hoverScale,
+  cardWidth,
+  onClick
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      className="relative flex-shrink-0 group overflow-visible cursor-pointer"
+      style={{
+        width: cardWidth,
+        height: "380px",
+        transformStyle: "preserve-3d",
+      }}
+      onClick={onClick}
+      custom={isHovered ? hoverScale : angle}
+      variants={cardVariants}
+      initial="offHover"
+      animate={isHovered ? "onHover" : "offHover"}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative h-full w-full overflow-hidden border border-white/10 shadow-2xl rounded-2xl"
+           style={{ backgroundColor: 'var(--bg-accent)', minHeight: '300px' }}>
+        <img
+          src={item.url}
+          alt={item.alt || "Slider Image"}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/70 p-8 flex flex-col justify-center items-center text-center transition-all duration-500">
+          <span style={{ color: '#f59e0b', opacity: isHovered ? 1 : 0 }} className="font-bold text-xs tracking-widest uppercase mb-2 transition-all duration-500 transform translate-y-0 pointer-events-none drop-shadow-md">Collections</span>
+          <h3 className="text-white text-2xl font-bold mb-3 transition-colors duration-300 drop-shadow-xl">{item.title}</h3>
+          <div style={{ opacity: isHovered ? 1 : 0 }} className="flex items-center justify-center gap-3 transition-all duration-500 delay-100 transform translate-y-0 pointer-events-none">
+            <span className="text-white/90 text-sm font-medium">{item.count}</span>
+            <div style={{ backgroundColor: '#f59e0b' }} className="w-10 h-[1px] opacity-50" />
+            <span style={{ color: '#f59e0b' }} className="text-xs font-bold uppercase tracking-wider drop-shadow-md">Explore</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const AngledSlider = ({
+  items,
+  speed = 40,
+  direction = "left",
+  containerHeight = "450px",
+  cardWidth = "300px",
+  gap = "40px",
+  angle = 20,
+  hoverScale = 1.05,
+  className,
+  onItemClick
+}) => {
+  const [width, setWidth] = useState(0);
+  const containerRef = useRef(null);
+  const x = useMotionValue(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const duplicatedItems = [...items, ...items, ...items];
+
+  useEffect(() => {
+    const calculateWidth = () => {
+      const numWidth = parseInt(cardWidth?.toString().replace("px", "") || "300");
+      const numGap = parseInt(gap?.toString().replace("px", "") || "40");
+
+      if (!isNaN(numWidth) && !isNaN(numGap)) {
+        const calculatedWidth = (numWidth + numGap) * items.length;
+        setWidth(calculatedWidth);
+      } else if (containerRef.current) {
+        const scrollWidth = containerRef.current.scrollWidth;
+        setWidth(scrollWidth / 3);
+      }
+    };
+
+    calculateWidth();
+    window.addEventListener('resize', calculateWidth);
+    return () => window.removeEventListener('resize', calculateWidth);
+  }, [items, cardWidth, gap]);
+
+  useEffect(() => {
+    if (width <= 0) return;
+
+    const startX = direction === "left" ? 0 : -width;
+    const endX = direction === "left" ? -width : 0;
+
+    if (isHovered) return;
+
+    const runAnimation = () => {
+      const currentX = x.get();
+      const totalDist = width;
+      const dist = Math.abs(endX - currentX);
+      const duration = speed * (dist / totalDist);
+
+      const controls = animate(x, endX, {
+        duration: duration,
+        ease: "linear",
+        onComplete: () => {
+          x.set(startX);
+          runAnimation();
+        }
+      });
+      return controls;
+    };
+
+    const animation = runAnimation();
+    return () => animation.stop();
+  }, [width, speed, direction, isHovered, x]);
+
+  return (
+    <div
+      className={cn(
+        "relative w-full overflow-hidden py-10",
+        className
+      )}
+      style={{
+        height: containerHeight,
+        perspective: "1200px",
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <motion.div
+        ref={containerRef}
+        className="flex items-center"
+        style={{ x, gap, transformStyle: "preserve-3d" }}
+      >
+        {duplicatedItems.map((item, index) => (
+          <AngledCard
+            key={`${item.id}-${index}`}
+            item={item}
+            angle={angle}
+            hoverScale={hoverScale}
+            cardWidth={cardWidth}
+            onClick={() => onItemClick && onItemClick(item.title)}
+          />
+        ))}
+      </motion.div>
+    </div>
+  );
+};
 
 const categoryStructure = {
   "Bags & Travel Accessories": ["Jute Bags", "Laptop Bags", "Ladies Slings", "Ladies Wallets", "Capsule Umbrella", "Umbrella", "Tiffin Pouch"],
@@ -112,7 +293,7 @@ const optimizeCloudinaryUrl = (url, width = 800, quality = 'auto') => {
   return url.replace('/upload/', `/upload/w_${width},q_${quality},f_auto,c_limit/`);
 };
 
-const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, currentUser, onLogout, onAccountClick, onWishlistClick, onCartClick, onContactClick }) => {
+const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, onAboutClick, currentUser, onLogout, onAccountClick, onWishlistClick, onCartClick, onContactClick, cartAnimation }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -128,69 +309,92 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, currentUser, onLo
   const likedCount = currentUser?.likedProducts?.length || 0;
 
   return (
-    <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${isMenuOpen ? 'menu-open' : ''}`}>
-      <div className="container navbar-content">
-        <div
-          onClick={() => {
-            onHomeClick();
-            setIsMenuOpen(false);
-            window.location.href = '#';
-          }}
-          style={{ cursor: 'pointer' }}
-          className="brand-wrapper"
-        >
-          <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '50px', width: 'auto' }} />
-          <span className="brand-sri-sai">SRI SAI</span>
-          <span className="brand-gifts">bags</span>
-        </div>
-
-        <div className="nav-links">
-          <a href="#home" className="nav-link" onClick={onHomeClick}>Home</a>
-          <a href="#products" className="nav-link" onClick={(e) => { e.preventDefault(); onProductsClick && onProductsClick(); }}>Products</a>
-          <a href="#about" className="nav-link">About</a>
-          <a href="#catalogue" className="nav-link">Catalogue</a>
-          <a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); onContactClick && onContactClick(); }}>Contact</a>
-        </div>
-
-        <div className="nav-actions">
-          <div className="desktop-actions">
-            <div onClick={onWishlistClick} style={{ position: 'relative', cursor: 'pointer' }}>
-              <Heart className="action-icon" size={20} style={{ color: likedCount > 0 ? '#ef4444' : '#0f172a' }} />
-              {likedCount > 0 && <span className="cart-badge" style={{ background: '#ef4444' }}>{likedCount}</span>}
-            </div>
-            <div onClick={onCartClick} style={{ position: 'relative', cursor: 'pointer' }}>
-              <ShoppingCart className="action-icon" size={20} />
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-            </div>
+    <>
+      <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${isMenuOpen ? 'menu-open' : ''}`}>
+        <div className="container navbar-content">
+          <div
+            onClick={() => {
+              onHomeClick();
+              setIsMenuOpen(false);
+              window.location.href = '#';
+            }}
+            style={{ cursor: 'pointer' }}
+            className="brand-wrapper"
+          >
+            <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '50px', width: 'auto' }} />
+            <span className="brand-sri-sai">SRI SAI</span>
+            <span className="brand-gifts">BAGS</span>
           </div>
 
-          {currentUser ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div
-                onClick={onAccountClick}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 8px', borderRadius: '20px', background: 'rgba(245, 158, 11, 0.1)' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0f172a', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                  {currentUser.fullName[0].toUpperCase()}
-                </div>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>{currentUser.fullName.split(' ')[0]}</span>
-              </div>
-              <button className="btn-signin desktop-btn" style={{ background: '#ef4444', border: 'none' }} onClick={onLogout}>Sign Out</button>
-            </div>
-          ) : (
-            <button className="btn-signin desktop-btn" onClick={onSignInClick}>Sign In</button>
-          )}
+          <div className="nav-links">
+            <a href="#home" className="nav-link" onClick={onHomeClick}>Home</a>
+            <a href="#products" className="nav-link" onClick={(e) => { e.preventDefault(); onProductsClick && onProductsClick(); }}>Products</a>
+            <a href="#about" className="nav-link" onClick={(e) => { e.preventDefault(); onAboutClick(); }}>About</a>
+            <a href="#catalogue" className="nav-link">Catalogue</a>
+            <a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); onContactClick && onContactClick(); }}>Contact</a>
+          </div>
 
-          <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="nav-actions">
+            <div className="desktop-actions">
+              <div onClick={onWishlistClick} style={{ position: 'relative', cursor: 'pointer' }}>
+                <Heart className="action-icon" size={20} style={{ color: likedCount > 0 ? '#ef4444' : '#0f172a' }} />
+                {likedCount > 0 && <span className="cart-badge" style={{ background: '#ef4444' }}>{likedCount}</span>}
+              </div>
+              <motion.div 
+                onClick={onCartClick} 
+                style={{ position: 'relative', cursor: 'pointer' }}
+                animate={cartAnimation ? { 
+                  scale: [1, 1.3, 1],
+                  rotate: [0, -10, 10, 0]
+                } : {}}
+                transition={{ duration: 0.5 }}
+              >
+                <ShoppingCart className="action-icon" size={20} />
+                <AnimatePresence>
+                  {cartCount > 0 && (
+                    <motion.span 
+                      key="cart-badge"
+                      className="cart-badge"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
+
+            {currentUser ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  onClick={onAccountClick}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 8px', borderRadius: '20px', background: 'rgba(245, 158, 11, 0.1)' }}>
+                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0f172a', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                    {currentUser.fullName[0].toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>{currentUser.fullName.split(' ')[0]}</span>
+                </div>
+                <button className="btn-signin desktop-btn" style={{ background: '#ef4444', border: 'none' }} onClick={onLogout}>Sign Out</button>
+              </div>
+            ) : (
+              <button className="btn-signin desktop-btn" onClick={onSignInClick}>Sign In</button>
+            )}
+
+            <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
       <div className={`mobile-menu ${isMenuOpen ? 'active' : ''}`}>
         <div className="mobile-nav-links">
           <a href="#home" className="nav-link" onClick={() => { onHomeClick(); setIsMenuOpen(false); }}>Home</a>
           <a href="#products" className="nav-link" onClick={(e) => { e.preventDefault(); onProductsClick && onProductsClick(); setIsMenuOpen(false); }}>Products</a>
-          <a href="#about" className="nav-link" onClick={() => setIsMenuOpen(false)}>About</a>
+          <a href="#about" className="nav-link" onClick={() => { onAboutClick(); setIsMenuOpen(false); }}>About</a>
           <a href="#catalogue" className="nav-link" onClick={() => setIsMenuOpen(false)}>Catalogue</a>
           <a href="#contact" className="nav-link" onClick={(e) => { e.preventDefault(); onContactClick && onContactClick(); setIsMenuOpen(false); }}>Contact</a>
           <div className="mobile-menu-actions">
@@ -215,7 +419,7 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, currentUser, onLo
           </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 
@@ -570,6 +774,61 @@ const Hero = () => {
         </AnimatePresence>
       </div>
 
+      {/* Floating Glass Stat Cards */}
+      <div style={{
+        position: 'absolute',
+        bottom: '120px',
+        right: '5%',
+        zIndex: 15,
+        display: 'flex',
+        gap: '16px',
+      }} className="hero-stats-desktop">
+        {[
+          { value: '500+', label: 'Products' },
+          { value: '9', label: 'Categories' },
+          { value: '★', label: 'Premium' }
+        ].map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 + i * 0.2, duration: 0.6 }}
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '16px',
+              padding: '20px 28px',
+              textAlign: 'center',
+              minWidth: '110px',
+            }}
+          >
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: '#f59e0b', lineHeight: 1, marginBottom: '6px', fontFamily: "'Outfit', sans-serif" }}>{stat.value}</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1.5px' }}>{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Slide counter */}
+      <div style={{
+        position: 'absolute',
+        bottom: '40px',
+        right: '5%',
+        zIndex: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: '0.85rem',
+        fontWeight: '600',
+        fontFamily: "'Outfit', sans-serif"
+      }}>
+        <span style={{ color: '#f59e0b', fontSize: '1.2rem', fontWeight: '800' }}>{String(currentSlide + 1).padStart(2, '0')}</span>
+        <span style={{ width: '24px', height: '1px', background: 'rgba(255,255,255,0.3)', display: 'inline-block' }} />
+        <span>{String(slides.length).padStart(2, '0')}</span>
+      </div>
+
       <div className="carousel-dots">
         {slides.map((_, index) => (
           <div
@@ -690,95 +949,56 @@ const Categories = ({ onCategoryClick, products }) => {
 
   const categories = categoriesList;
 
+  const sliderItems = categories.map(cat => ({
+    id: cat.name,
+    url: cat.image,
+    title: cat.name,
+    count: cat.count
+  }));
+
   return (
-    <section className="section-padding section-bg-accent" id="catalog" style={{ overflow: 'hidden' }}>
+    <section className="section-padding section-bg-accent" id="catalog" style={{ overflow: 'hidden', position: 'relative' }}>
+      {/* Decorative background elements */}
+      <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-60px', left: '-60px', width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
       <div className="container-fluid" style={{ maxWidth: '100%', padding: '0 2rem' }}>
-        <h2 className="text-center" style={{ fontSize: '2.5rem', marginBottom: '48px' }}>Shop by Category</h2>
-        <div className="category-marquee">
-          <div className="category-marquee-content">
-            {[...categories, ...categories].map((cat, index) => (
-              <motion.div
-                key={cat.name + index}
-                whileHover={{ scale: 1.05, zIndex: 10 }}
-                onClick={() => onCategoryClick && onCategoryClick(cat.name)}
-                className="category-card"
-                style={{
-                  width: '280px',
-                  height: '320px',
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                  position: 'relative',
-                  borderRadius: '24px',
-                  overflow: 'hidden',
-                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                  background: '#ffffff'
-                }}
-              >
-                {/* Background Image */}
-                <motion.div
-                  initial={{ opacity: 0.7 }}
-                  whileHover={{ opacity: 1, scale: 1.1 }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    backgroundImage: `url(${cat.image || 'https://via.placeholder.com/300x400?text=No+Image'})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    transition: 'opacity 0.5s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
-                  }}
-                />
-
-                {/* Dark Overlay */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
-                  zIndex: 1
-                }} />
-
-                {/* Content Overlay */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  padding: '32px 24px',
-                  zIndex: 2,
-                  color: 'white',
-                  textAlign: 'left'
-                }}>
-                  <span style={{
-                    color: 'var(--accent)',
-                    fontWeight: '700',
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    display: 'block',
-                    marginBottom: '8px'
-                  }}>Collections</span>
-                  <h3 style={{
-                    fontSize: '1.5rem',
-                    marginBottom: '4px',
-                    fontWeight: '800',
-                    lineHeight: '1.2'
-                  }}>{cat.name}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}>
-                    <span style={{ fontSize: '0.875rem' }}>{cat.count}</span>
-                    <div style={{ width: '20px', height: '1px', background: 'rgba(255,255,255,0.4)' }} />
-                    <span style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>View Catalog</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+        {/* Enhanced heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ textAlign: 'center', marginBottom: '60px' }}
+        >
+          <span style={{
+            display: 'inline-block',
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            color: 'white',
+            padding: '6px 20px',
+            borderRadius: '50px',
+            fontSize: '0.8rem',
+            fontWeight: '700',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            marginBottom: '20px',
+            fontFamily: "'Outfit', sans-serif"
+          }}>Curated Collections</span>
+          <h2 style={{ fontSize: '3.2rem', marginBottom: '16px', color: '#0f172a' }}>Shop by Category</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
+            <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, transparent, #f59e0b)' }} />
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} />
+            <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, #f59e0b, transparent)' }} />
           </div>
-        </div>
+          <p style={{ fontSize: '1rem', color: '#64748b', maxWidth: '500px', margin: '0 auto', fontFamily: "'Outfit', sans-serif" }}>Explore our handpicked premium gift categories</p>
+        </motion.div>
+        
+        <AngledSlider 
+          items={sliderItems} 
+          onItemClick={onCategoryClick}
+          containerHeight="500px"
+          cardWidth="320px"
+          speed={30}
+        />
       </div>
     </section>
   );
@@ -1071,160 +1291,65 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
   const comparePrice = (product.comparePrice && product.comparePrice > 0) ? product.comparePrice : Math.round((product.price || 0) * 1.2);
   const discountPercent = comparePrice > product.price ? Math.round(((comparePrice - product.price) / comparePrice) * 100) : 0;
 
-  // Create tags array using available category and material
-  const tags = [product.mainCategory || getMainCategoryForSub(product.category), product.category, product.material].filter(Boolean);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
+      className="uiverse-product-card"
       onClick={() => onClick && onClick(product)}
-      style={{
-        cursor: onClick ? 'pointer' : 'default',
-        padding: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'white',
-        borderRadius: '16px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-        height: '100%'
-      }}
     >
-      <div style={{
-        height: '280px',
-        width: '100%',
-        position: 'relative',
-        backgroundColor: '#f8fafc',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        borderBottom: '1px solid #f1f5f9'
-      }}>
-        <img
-          src={optimizeCloudinaryUrl(product.image, 600, 'auto:good') || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"}
-          alt={product.name || "Gift Set"}
-          loading="lazy"
-          decoding="async"
-          style={{
-            maxWidth: '90%',
-            maxHeight: '90%',
-            objectFit: 'contain',
-            filter: inStock ? 'none' : 'grayscale(100%)',
-            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-          className="product-card-image"
+      {discountPercent > 0 && <div className="uiverse-badge">{discountPercent}% OFF</div>}
+      
+      <button 
+        className="uiverse-wishlist"
+        onClick={(e) => {
+          e.stopPropagation();
+          onLikeClick && onLikeClick(product);
+        }}
+      >
+        <Heart 
+          size={18} 
+          fill={(product.liked || false) ? '#ef4444' : 'none'} 
+          color={(product.liked || false) ? '#ef4444' : '#94a3b8'} 
         />
+      </button>
 
-        <div style={{ position: 'absolute', top: '16px', left: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 2 }}>
-          {discountPercent > 0 && (
-            <div style={{ background: '#dcfce7', color: '#16a34a', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '800', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              {discountPercent}% OFF
-            </div>
-          )}
-        </div>
-        <div style={{ position: 'absolute', top: '16px', right: '60px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 2 }}>
-          {product.customizable && (
-            <div style={{ background: '#fef08a', color: '#b45309', padding: '4px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '800', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              CUSTOMIZABLE
-            </div>
-          )}
-        </div>
+      <img
+        src={optimizeCloudinaryUrl(product.image, 600, 'auto:good') || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"}
+        alt={product.name}
+        className="uiverse-card-image"
+        style={{ filter: inStock ? 'none' : 'grayscale(100%)' }}
+      />
 
-        <div style={{ position: 'absolute', bottom: '16px', right: '16px', zIndex: 2 }}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onLikeClick && onLikeClick(product);
-            }}
-            style={{ width: '36px', height: '36px', backgroundColor: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', cursor: 'pointer', color: (product.liked || false) ? '#ef4444' : '#94a3b8', transition: 'color 0.2s' }}
-            onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
-            onMouseOut={(e) => e.currentTarget.style.color = (product.liked || false) ? '#ef4444' : '#94a3b8'}
-          >
-            <Heart size={18} fill={(product.liked || false) ? 'currentColor' : 'none'} />
-          </button>
-        </div>
-        {!inStock && (
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '8px 16px', borderRadius: '8px', fontWeight: '600', letterSpacing: '1px' }}>
-            OUT OF STOCK
-          </div>
-        )}
+      <div className="uiverse-card-text">
+        <span>{product.name}</span>
+        <p>₹{product.price}</p>
       </div>
 
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-
-        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '2.8rem' }}>
-          {product.name || "Untitled Product"}
-        </h3>
-
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
-          {tags.map((tag, i) => (
-            <span key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '500' }}>
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {(product.width > 0 || product.height > 0 || product.depth > 0) && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.75rem', fontWeight: '600', marginBottom: '20px', background: '#fcfcfc', padding: '6px 10px', borderRadius: '6px', border: '1px dashed #e2e8f0' }}>
-            <Box size={14} style={{ opacity: 0.7 }} />
-            <span style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {[
-                product.height > 0 && `Height: ${product.height}"`,
-                product.width > 0 && `Width: ${product.width}"`,
-                product.depth > 0 && `Bottom Patty: ${product.depth}"`
-              ].filter(Boolean).join('  ×  ')}
-            </span>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '12px', marginTop: 'auto' }}>
-          <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#0f172a' }}>₹{product.price || 0}</span>
-          {comparePrice > product.price && (
-            <span style={{ fontSize: '1rem', color: '#94a3b8', textDecoration: 'line-through', marginBottom: '3px' }}>₹{comparePrice}</span>
-          )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-          <button
-            style={{ flex: 1, borderRadius: '8px', padding: '10px 4px', background: '#f59e0b', color: 'white', border: 'none', fontWeight: '600', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', opacity: inStock ? 1 : 0.5, cursor: inStock ? 'pointer' : 'not-allowed', transition: 'background-color 0.2s' }}
-            onMouseOver={(e) => inStock && (e.currentTarget.style.backgroundColor = '#d97706')}
-            onMouseOut={(e) => inStock && (e.currentTarget.style.backgroundColor = '#f59e0b')}
-            disabled={!inStock}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (inStock && onCartClick) onCartClick(product, 1);
-            }}
-          >
-            {inStock ? (
-              <>
-                <ShoppingCart size={16} /> Add to Cart
-              </>
-            ) : (
-              'Out of Stock'
-            )}
-          </button>
-          <button
-            style={{ flex: 1, borderRadius: '8px', padding: '10px 4px', background: '#25D366', color: 'white', border: 'none', fontWeight: '600', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#128C7E')}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#25D366')}
-            onClick={(e) => {
-              e.stopPropagation();
-              const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image Link:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
-              window.open(`https://wa.me/918883888907?text=${encodeURIComponent(message)}`, '_blank'); 
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M12.01 2.01a10.003 10.003 0 0 0-8.52 15.28L2 22l4.87-1.46A9.957 9.957 0 0 0 12.01 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm.01 18.25c-1.63 0-3.19-.43-4.57-1.25l-3.26.98.98-3.21C4.4 15.42 4.02 13.78 4.02 12A8.01 8.01 0 0 1 12.02 4c4.41 0 8 3.59 8 8s-3.59 8-8 8zm4.33-5.59c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.61.77-.75.93-.14.16-.28.18-.52.06a6.52 6.52 0 0 1-1.92-1.19c-.58-.51-1.02-1.15-1.14-1.39-.12-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.23-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42H8.72c-.16 0-.41.06-.62.3-.21.24-.81.79-.81 1.93 0 1.14.83 2.24.94 2.4.11.16 1.63 2.49 3.96 3.5.55.24 1.05.39 1.48.5.55.15 1.06.13 1.46.08.45-.06 1.4-.57 1.6-1.13.2-.56.2-.104.14-.114-.06-.02-.22-.06-.46-.18z" />
-            </svg>
-            WhatsApp
-          </button>
-        </div>
+      <div className="uiverse-actions">
+        <button 
+          className="uiverse-action-btn btn-cart"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (inStock && onCartClick) onCartClick(product, 1);
+          }}
+        >
+          <ShoppingCart size={16} /> Cart
+        </button>
+        <button 
+          className="uiverse-action-btn btn-whatsapp"
+          onClick={(e) => {
+            e.stopPropagation();
+            const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
+            window.open(`https://wa.me/918883888907?text=${encodeURIComponent(message)}`, '_blank');
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12.01 2.01a10.003 10.003 0 0 0-8.52 15.28L2 22l4.87-1.46A9.957 9.957 0 0 0 12.01 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm.01 18.25c-1.63 0-3.19-.43-4.57-1.25l-3.26.98.98-3.21C4.4 15.42 4.02 13.78 4.02 12A8.01 8.01 0 0 1 12.02 4c4.41 0 8 3.59 8 8s-3.59 8-8 8zm4.33-5.59c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.61.77-.75.93-.14.16-.28.18-.52.06a6.52 6.52 0 0 1-1.92-1.19c-.58-.51-1.02-1.15-1.14-1.39-.12-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.23-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42H8.72c-.16 0-.41.06-.62.3-.21.24-.81.79-.81 1.93 0 1.14.83 2.24.94 2.4.11.16 1.63 2.49 3.96 3.5.55.24 1.05.39 1.48.5.55.15 1.06.13 1.46.08.45-.06 1.4-.57 1.6-1.13.2-.56.2-.104.14-.114-.06-.02-.22-.06-.46-.18z" />
+          </svg>
+          Enquire
+        </button>
       </div>
     </motion.div>
   );
@@ -1269,6 +1394,34 @@ const FeaturedProducts = ({ products, loading, onProductClick, onCategoryClick, 
   return (
     <section className="section-padding collection-bg" id="new-arrivals">
       <div className="container">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ textAlign: 'center', marginBottom: '80px' }}
+        >
+          <span style={{
+            display: 'inline-block',
+            background: 'rgba(245, 158, 11, 0.1)',
+            color: '#f59e0b',
+            padding: '6px 20px',
+            borderRadius: '50px',
+            fontSize: '0.8rem',
+            fontWeight: '700',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            marginBottom: '20px',
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+            fontFamily: "'Outfit', sans-serif"
+          }}>Premium Range</span>
+          <h2 style={{ fontSize: '3.5rem', marginBottom: '16px', color: 'white', fontFamily: "'Playfair Display', serif" }}>Explore Our Collection</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, transparent, #f59e0b)' }} />
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} />
+            <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, #f59e0b, transparent)' }} />
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.6)', maxWidth: '600px', margin: '0 auto', fontSize: '1.1rem' }}>Discover our wide variety of customizable corporate and personal gifts</p>
+        </motion.div>
         {categories.map((category) => {
           const knownCategoryNames = Object.keys(categoryStructure);
           const allCategoryProducts = products
@@ -1284,10 +1437,25 @@ const FeaturedProducts = ({ products, loading, onProductClick, onCategoryClick, 
               return mainCat === sectionName;
             })
             .sort((a, b) => {
+              // Custom Priority: Laptop Bags/Anutica > General Bags > Jute Bags > Umbrellas
+              const getRank = (p) => {
+                const cat = (p.category || '').toLowerCase();
+                const name = (p.name || '').toLowerCase();
+                if (cat.includes('laptop') || name.includes('laptop') || name.includes('anutica')) return 1;
+                if (cat.includes('bag') && !cat.includes('jute')) return 2;
+                if (cat.includes('jute')) return 3;
+                if (cat.includes('umbrella')) return 4;
+                return 5;
+              };
+
+              const rankA = getRank(a);
+              const rankB = getRank(b);
+              if (rankA !== rankB) return rankA - rankB;
+
               const pA = a.priority ?? 999;
               const pB = b.priority ?? 999;
               if (pA !== pB) return pA - pB;
-              return b.id > a.id ? 1 : -1;
+              return (b.id || b._id) > (a.id || a._id) ? 1 : -1;
             });
 
           if (allCategoryProducts.length === 0) return null;
@@ -1624,6 +1792,257 @@ const CategoryPage = ({ category, products, loading, onProductClick, onBack, onL
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+const AboutPage = ({ onBack }) => {
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, []);
+
+  const stats = [
+    { label: 'Quality Standards', icon: <ShieldCheck size={32} /> },
+    { label: 'Timely Delivery', icon: <Clock size={32} /> },
+    { label: 'Bulk Manufacturing', icon: <Package size={32} /> },
+    { label: 'Custom Branding', icon: <PenTool size={32} /> },
+  ];
+
+  const productCategories = [
+    { title: "Bags", items: ["Laptop Bags", "Sling Bags", "Travel Bags", "Office Bags", "Jute Bags", "Cotton Bags", "Shopping Bags"] },
+    { title: "Accessories", items: ["Umbrellas", "Notebook & Diary Sets", "Office Gift Combos", "Promotional Products", "Wedding Thamboolam Bags"] }
+  ];
+
+  const whyChooseUs = [
+    { title: "Premium Quality", desc: "Finest fabrics and meticulous stitching.", icon: <Shield size={24} />, grid: "span-2" },
+    { title: "Custom Branding", desc: "Expert logo printing and packaging.", icon: <Edit size={24} />, grid: "span-1" },
+    { title: "Eco-Friendly", desc: "Sustainable Jute and Cotton options.", icon: <Sparkles size={24} />, grid: "span-1" },
+    { title: "Bulk Support", desc: "Scalable manufacturing for any size.", icon: <Box size={24} />, grid: "span-2" },
+    { title: "Wholesale Pricing", desc: "Competitive rates for maximum value.", icon: <TrendingUp size={24} />, grid: "span-1" },
+    { title: "Timely Delivery", desc: "Strict adherence to your timelines.", icon: <Clock size={24} />, grid: "span-1" },
+  ];
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#fff', color: '#0f172a', fontFamily: "'Outfit', sans-serif" }}>
+      {/* Immersive Hero */}
+      <section style={{ height: '90vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url("/images/about_craftsmanship.png")',
+          backgroundSize: 'cover', backgroundPosition: 'center',
+          transform: 'scale(1.1)', filter: 'brightness(0.4)'
+        }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.8), transparent, rgba(15,23,42,0.9))' }} />
+        
+        <div className="container" style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <span style={{ color: '#f59e0b', fontWeight: '800', letterSpacing: '6px', textTransform: 'uppercase', fontSize: '0.85rem', marginBottom: '20px', display: 'block' }}>Since 2010</span>
+            <h1 style={{ fontSize: 'clamp(3rem, 10vw, 7rem)', fontWeight: '950', color: '#fff', lineHeight: 0.9, letterSpacing: '-2px', marginBottom: '40px' }}>
+              REDEFINING <br />
+              <span style={{ color: '#f59e0b' }}>GIFTING.</span>
+            </h1>
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+              <div style={{ width: '40px', height: '2px', backgroundColor: '#f59e0b', marginTop: '12px' }} />
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', maxWidth: '600px', lineHeight: 1.5 }}>
+                At Sri Sai Bags, we craft products that don't just carry items—they carry your brand's reputation.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Floating Background Text */}
+        <div style={{
+          position: 'absolute', bottom: '10%', left: '-5%',
+          fontSize: '15vw', fontWeight: '900', color: 'rgba(255,255,255,0.03)',
+          whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 1
+        }}>
+          QUALITY CRAFT
+        </div>
+      </section>
+
+      {/* Our Philosophy - Split Section */}
+      <section style={{ padding: '120px 0', overflow: 'hidden' }}>
+        <div className="container">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              style={{ position: 'relative' }}
+            >
+              <div style={{ position: 'relative', zIndex: 2, borderRadius: '40px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.1)' }}>
+                <img src="/images/about_gifting.png" alt="Corporate Gifting" style={{ width: '100%', display: 'block' }} />
+              </div>
+              <div style={{
+                position: 'absolute', top: '-40px', left: '-40px',
+                width: '180px', height: '180px', background: 'rgba(245,158,11,0.1)',
+                borderRadius: '50%', filter: 'blur(40px)', zIndex: 1
+              }} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <span style={{ color: '#f59e0b', fontWeight: '700', fontSize: '0.9rem', marginBottom: '12px', display: 'block' }}>OUR PHILOSOPHY</span>
+              <h2 style={{ fontSize: '3rem', fontWeight: '900', lineHeight: 1.1, marginBottom: '32px' }}>
+                Every Brand Tells a <span style={{ color: '#f59e0b' }}>Story.</span> We Help You Tell It.
+              </h2>
+              <p style={{ color: '#475569', fontSize: '1.15rem', lineHeight: 1.8, marginBottom: '32px' }}>
+                We believe that every corporate gift is a silent ambassador for your business. That's why we meticulously combine modern design with industrial durability, ensuring that every bag and accessory we produce leaves a lasting mark of professionalism.
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                {stats.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '12px', borderRadius: '12px' }}>
+                      {React.cloneElement(s.icon, { size: 20 })}
+                    </div>
+                    <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bento Grid - Why Choose Us */}
+      <section style={{ backgroundColor: '#0f172a', padding: '120px 0', color: '#fff' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <h2 style={{ fontSize: '3.5rem', fontWeight: '900', marginBottom: '20px' }}>The Sri Sai <span style={{ color: '#f59e0b' }}>Advantage</span></h2>
+            <p style={{ color: '#94a3b8', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto' }}>
+              What sets us apart in the world of corporate manufacturing and bespoke gifting.
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '24px',
+            gridAutoRows: 'minmax(200px, auto)'
+          }}>
+            {whyChooseUs.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.05)' }}
+                style={{
+                  gridColumn: item.grid === "span-2" ? "span 2" : "span 1",
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '32px',
+                  padding: '40px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <div style={{ color: '#f59e0b', marginBottom: '24px' }}>{item.icon}</div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '12px' }}>{item.title}</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Product Universe */}
+      <section style={{ padding: '120px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '100px' }}>
+            <span style={{ color: '#f59e0b', fontWeight: '800', letterSpacing: '4px', fontSize: '0.8rem', display: 'block', marginBottom: '16px' }}>OUR UNIVERSE</span>
+            <h2 style={{ fontSize: '4rem', fontWeight: '950', letterSpacing: '-1px' }}>Product Spectrum</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            {productCategories.map((cat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                style={{
+                  background: '#f8fafc',
+                  padding: '60px',
+                  borderRadius: '40px',
+                  border: '1px solid #e2e8f0'
+                }}
+              >
+                <h3 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '40px', color: '#1e293b' }}>{cat.title}</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                  {cat.items.map((item, j) => (
+                    <span key={j} style={{
+                      backgroundColor: '#fff',
+                      color: '#475569',
+                      padding: '12px 24px',
+                      borderRadius: '100px',
+                      fontSize: '0.9rem',
+                      fontWeight: '700',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
+                    }}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Modern CTA */}
+      <section style={{ paddingBottom: '120px' }}>
+        <div className="container">
+          <div style={{
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            padding: '100px 60px',
+            borderRadius: '50px',
+            textAlign: 'center',
+            color: '#fff',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+             <div style={{
+              position: 'absolute', top: '-100px', right: '-100px',
+              width: '300px', height: '300px', background: 'rgba(255,255,255,0.1)',
+              borderRadius: '50%', filter: 'blur(80px)'
+            }} />
+            
+            <h2 style={{ fontSize: '3.5rem', fontWeight: '900', marginBottom: '32px' }}>Let's Create Something <br /> Extraordinary Together.</h2>
+            <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.9)', maxWidth: '700px', margin: '0 auto 48px', lineHeight: 1.6 }}>
+              From startups to global corporations, we provide products that represent your business with style, quality, and professionalism.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              style={{
+                background: '#fff',
+                color: '#d97706',
+                padding: '24px 64px',
+                borderRadius: '100px',
+                fontSize: '1.2rem',
+                fontWeight: '800',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
+              }}
+            >
+              Start Your Project
+            </motion.button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
@@ -1971,30 +2390,59 @@ const Newsletter = () => {
   return (
     <section className="newsletter-section">
       <div className="container">
-        <div className="newsletter-box">
+        <motion.div 
+          className="newsletter-box"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Dot grid pattern overlay */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(245,158,11,0.06) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none', zIndex: 0 }} />
+
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <h2>Join the Luxe Circle</h2>
-            <p style={{ color: '#94a3b8', fontSize: '1.125rem', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
+            <span style={{
+              display: 'inline-block',
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
+              color: '#f59e0b',
+              padding: '6px 20px',
+              borderRadius: '50px',
+              fontSize: '0.8rem',
+              fontWeight: '700',
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              fontFamily: "'Outfit', sans-serif"
+            }}>Exclusive Access</span>
+            <h2 style={{ fontSize: '2.8rem', marginBottom: '16px' }}>Join the Luxe Circle</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, transparent, #f59e0b)' }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#f59e0b', transform: 'rotate(45deg)' }} />
+              <div style={{ width: '40px', height: '2px', background: 'linear-gradient(90deg, #f59e0b, transparent)' }} />
+            </div>
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '40px', maxWidth: '550px', margin: '0 auto 40px', lineHeight: 1.7 }}>
               Subscribe to receive updates, access to exclusive deals, and more.
             </p>
-            <div className="newsletter-form">
+            <div className="newsletter-form" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
                 className="newsletter-input"
+                style={{ fontSize: '1rem' }}
               />
-              <button className="btn btn-primary" style={{ padding: '12px 32px' }}>Subscribe</button>
+              <button className="btn" style={{ padding: '14px 36px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', borderRadius: '50px', fontWeight: '700', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}>Subscribe</button>
             </div>
           </div>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(255, 51, 102, 0.2)', borderRadius: '50%', filter: 'blur(64px)' }}></div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: '128px', height: '128px', background: 'rgba(212, 175, 55, 0.2)', borderRadius: '50%', filter: 'blur(48px)' }}></div>
-        </div>
+          {/* Animated glow orbs */}
+          <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(40px)', animation: 'float-slow 15s ease-in-out infinite' }}></div>
+          <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(40px)', animation: 'float-slow 12s ease-in-out infinite reverse' }}></div>
+        </motion.div>
       </div>
     </section>
   );
 };
 
-const Footer = ({ onHomeClick, onProductsClick, onContactClick }) => {
+const Footer = ({ onHomeClick, onProductsClick, onAboutClick, onContactClick }) => {
   return (
     <footer className="footer">
       <div className="container">
@@ -2010,7 +2458,7 @@ const Footer = ({ onHomeClick, onProductsClick, onContactClick }) => {
             <div className="social-links">
               <div className="social-icon"><Instagram size={20} /></div>
               <div className="social-icon"><Facebook size={20} /></div>
-              <div className="social-icon"><Twitter size={20} /></div>
+                <div className="social-icon"><Twitter size={20} /></div>
             </div>
           </div>
 
@@ -2019,7 +2467,7 @@ const Footer = ({ onHomeClick, onProductsClick, onContactClick }) => {
             <ul className="footer-links">
               <li className="footer-link-item"><a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); onHomeClick(); window.scrollTo(0, 0); }}>Home</a></li>
               <li className="footer-link-item"><a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); onProductsClick(); window.scrollTo(0, 0); }}>Products</a></li>
-              <li className="footer-link-item"><a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); onHomeClick(); window.scrollTo(0, 0); }}>About Us</a></li>
+              <li className="footer-link-item"><a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); onAboutClick ? onAboutClick() : (window.location.hash = '#about'); window.scrollTo(0, 0); }}>About Us</a></li>
               <li className="footer-link-item"><a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); onContactClick(); window.scrollTo(0, 0); }}>Contact</a></li>
             </ul>
           </div>
@@ -3142,103 +3590,16 @@ const ProductsPage = ({ products, currentUser, onProductClick, onCartClick, onLi
           {/* Products Grid */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {(() => {
-              const renderProductCard = (product) => {
-                const liked = currentUser?.likedProducts?.some(l => {
-                  const lid = (typeof l === 'string' ? l : (l?._id || l?.id))?.toString();
-                  return lid === (product.id || product._id)?.toString();
-                });
-
-                const tags = [];
-                if (product.category) tags.push(product.category.split(' ')[0]);
-                if (product.material) tags.push(product.material);
-                if (tags.length === 0) tags.push("Gift", "Premium");
-
-                const discount = product.comparePrice && product.comparePrice > product.price
-                  ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
-                  : null;
-
-                return (
-                  <div key={product.id || product._id} style={{ background: 'white', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' }}>
-                    <div
-                      onClick={() => onProductClick(product)}
-                      style={{ position: 'relative', height: '240px', background: '#f8fafc', padding: '16px', cursor: 'pointer' }}
-                    >
-                      {discount && (
-                        <span style={{ position: 'absolute', top: '16px', left: '16px', background: '#ef4444', color: 'white', padding: '4px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '800', zIndex: 2 }}>
-                          {discount}% OFF
-                        </span>
-                      )}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onLikeClick(product); }}
-                        style={{ position: 'absolute', top: '16px', right: '16px', background: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', zIndex: 2 }}
-                      >
-                        <Heart size={18} color={liked ? "#ef4444" : "#94a3b8"} fill={liked ? "#ef4444" : "none"} />
-                      </button>
-                      <img
-                        src={optimizeCloudinaryUrl(product.image, 400, 'auto:low')}
-                        alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                      />
-                    </div>
-
-                    <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-                        <Star size={14} color="#f59e0b" fill="#f59e0b" />
-                        <span style={{ color: '#0f172a', fontWeight: '700', fontSize: '0.85rem' }}>{product.ratings || 4.8}</span>
-                        <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>({Math.floor(Math.random() * 100 + 20)} reviews)</span>
-                      </div>
-
-                      <h4 style={{ fontSize: '1.15rem', fontWeight: '800', color: '#0f172a', marginBottom: '16px', lineHeight: 1.4 }}>{product.name}</h4>
-
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-                        {tags.slice(0, 2).map((t, idx) => (
-                          <span key={idx} style={{ padding: '4px 10px', background: '#f1f5f9', color: '#64748b', fontSize: '0.75rem', borderRadius: '6px' }}>{t}</span>
-                        ))}
-                      </div>
-
-                      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                          <div>
-                            <p style={{ fontSize: '1.4rem', fontWeight: '900', color: '#0f172a', margin: '0 0 2px' }}>₹{product.price}</p>
-                            {discount && <p style={{ fontSize: '0.85rem', color: '#94a3b8', textDecoration: 'line-through', margin: 0 }}>₹{product.comparePrice}</p>}
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onCartClick(product); }}
-                          style={{
-                            width: '100%', borderRadius: '8px', padding: '12px', background: '#f59e0b', color: 'white',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', cursor: 'pointer',
-                            fontWeight: '600', fontSize: '0.95rem', transition: 'background-color 0.2s'
-                          }}
-                          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#d97706')}
-                          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f59e0b')}
-                        >
-                          <ShoppingCart size={18} /> Add to Cart
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const message = `*Product Enquiry* 🎁\n\n*Name:* ${product.name}\n*Price:* ₹${product.price}\n*Image Link:* ${product.image || 'N/A'}\n\nHi! I'm interested in this product. Can you provide more details?`;
-                            window.open(`https://wa.me/918883888907?text=${encodeURIComponent(message)}`, '_blank'); 
-                          }}
-                          style={{
-                            width: '100%', borderRadius: '8px', padding: '12px', background: '#25D366', color: 'white',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: 'none', cursor: 'pointer',
-                            fontWeight: '600', fontSize: '0.95rem', transition: 'background-color 0.2s'
-                          }}
-                          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#128C7E')}
-                          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#25D366')}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path d="M12.01 2.01a10.003 10.003 0 0 0-8.52 15.28L2 22l4.87-1.46A9.957 9.957 0 0 0 12.01 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm.01 18.25c-1.63 0-3.19-.43-4.57-1.25l-3.26.98.98-3.21C4.4 15.42 4.02 13.78 4.02 12A8.01 8.01 0 0 1 12.02 4c4.41 0 8 3.59 8 8s-3.59 8-8 8zm4.33-5.59c-.24-.12-1.4-.69-1.62-.77-.22-.08-.38-.12-.54.12-.16.24-.61.77-.75.93-.14.16-.28.18-.52.06a6.52 6.52 0 0 1-1.92-1.19c-.58-.51-1.02-1.15-1.14-1.39-.12-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.23-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42H8.72c-.16 0-.41.06-.62.3-.21.24-.81.79-.81 1.93 0 1.14.83 2.24.94 2.4.11.16 1.63 2.49 3.96 3.5.55.24 1.05.39 1.48.5.55.15 1.06.13 1.46.08.45-.06 1.4-.57 1.6-1.13.2-.56.2-.104.14-.114-.06-.02-.22-.06-.46-.18z" />
-                          </svg>
-                          WhatsApp Enquiry
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              };
+              const renderProductCard = (product, index) => (
+                <ProductCard
+                  key={product.id || product._id || index}
+                  product={product}
+                  index={index}
+                  onClick={onProductClick}
+                  onLikeClick={onLikeClick}
+                  onCartClick={onCartClick}
+                />
+              );
 
               // Group products by subcategory if a main category is selected
               const isMainCategorySelected = Object.keys(categoryStructure).includes(selectedCategory);
@@ -3305,9 +3666,14 @@ function App() {
   const [isContactPageActive, setIsContactPageActive] = useState(() => {
     return sessionStorage.getItem('elysian_contact_active') === 'true';
   });
+  const [isAboutPageActive, setIsAboutPageActive] = useState(() => {
+    return sessionStorage.getItem('elysian_about_active') === 'true';
+  });
   const [isProductsPageActive, setIsProductsPageActive] = useState(() => {
     return sessionStorage.getItem('elysian_products_active') === 'true';
   });
+  const [cartAnimation, setCartAnimation] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   // Effect to persist view state
   useEffect(() => {
@@ -3337,6 +3703,10 @@ function App() {
   useEffect(() => {
     sessionStorage.setItem('elysian_contact_active', isContactPageActive);
   }, [isContactPageActive]);
+
+  useEffect(() => {
+    sessionStorage.setItem('elysian_about_active', isAboutPageActive);
+  }, [isAboutPageActive]);
 
   useEffect(() => {
     sessionStorage.setItem('elysian_products_active', isProductsPageActive);
@@ -3402,6 +3772,12 @@ function App() {
       const data = await res.json();
       if (data.success) {
         setCurrentUser(prev => ({ ...prev, cart: data.cart }));
+        setCartAnimation(true);
+        setShowToast(true);
+        setTimeout(() => {
+          setCartAnimation(false);
+          setShowToast(false);
+        }, 3000);
       }
     } catch (err) {
       console.error('Error adding to cart:', err);
@@ -3457,6 +3833,7 @@ function App() {
     setIsWishlistPageActive(false);
     setIsCartPageActive(false);
     setIsContactPageActive(false);
+    setIsAboutPageActive(false);
     setIsProductsPageActive(false);
   };
 
@@ -3466,6 +3843,7 @@ function App() {
     setIsWishlistPageActive(false);
     setIsCartPageActive(false);
     setIsContactPageActive(false);
+    setIsAboutPageActive(false);
     setIsProductsPageActive(true);
   };
 
@@ -3475,7 +3853,18 @@ function App() {
     setIsWishlistPageActive(false);
     setIsCartPageActive(false);
     setIsProductsPageActive(false);
+    setIsAboutPageActive(false);
     setIsContactPageActive(true);
+  };
+
+  const goToAbout = () => {
+    setSelectedProductView(null);
+    setSelectedCategory(null);
+    setIsWishlistPageActive(false);
+    setIsCartPageActive(false);
+    setIsProductsPageActive(false);
+    setIsContactPageActive(false);
+    setIsAboutPageActive(true);
   };
 
   // Sync user data on load if logged in
@@ -3533,6 +3922,7 @@ function App() {
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)' }}>
       <Navbar
         currentUser={currentUser}
+        cartAnimation={cartAnimation}
         onLogout={() => {
           setCurrentUser(null);
           sessionStorage.removeItem('elysian_current_user');
@@ -3542,6 +3932,7 @@ function App() {
         onAccountClick={() => setIsAccountModalOpen(true)}
         onHomeClick={goHome}
         onProductsClick={goToProducts}
+        onAboutClick={goToAbout}
         onContactClick={goToContact}
         onWishlistClick={() => {
           if (!currentUser) { setIsAuthModalOpen(true); return; }
@@ -3571,6 +3962,8 @@ function App() {
           onCartClick={handleCartClick}
           onBuyNowClick={(p, q) => handleActionClick('Buy Now', p) && alert('Redirecting to checkout...')}
         />
+      ) : isAboutPageActive ? (
+        <AboutPage onBack={goHome} />
       ) : isContactPageActive ? (
         <ContactPage onBack={goHome} />
       ) : isCartPageActive ? (
@@ -3657,6 +4050,7 @@ function App() {
       <Footer
         onHomeClick={goHome}
         onProductsClick={goToProducts}
+        onAboutClick={goToAbout}
         onContactClick={goToContact}
       />
 
@@ -3673,6 +4067,36 @@ function App() {
         currentUser={currentUser}
         products={products}
       />
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            style={{
+              position: 'fixed',
+              bottom: '40px',
+              left: '50%',
+              zIndex: 9999,
+              background: '#0f172a',
+              color: 'white',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            <div style={{ background: '#22c55e', borderRadius: '50%', padding: '4px' }}>
+              <ShieldCheck size={16} color="white" />
+            </div>
+            <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>Added to cart successfully!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <motion.button
         className="floating-action"
