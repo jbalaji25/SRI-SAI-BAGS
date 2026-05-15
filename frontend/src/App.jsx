@@ -3848,6 +3848,9 @@ function App() {
       subtotal += itemTotal;
       message += `${index + 1}. *${item.product.name}*\n`;
       message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal}\n`;
+      if (item.product.image) {
+        message += `   Image: ${item.product.image}\n`;
+      }
     });
 
     const deliveryFee = subtotal >= 999 ? 0 : 99;
