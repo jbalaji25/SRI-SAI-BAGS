@@ -2,10 +2,14 @@
   "name": "giftshop-root",
   "version": "1.0.0",
   "description": "Root package for deploying giftshop on Render",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "install": "cd backend && npm install && cd ../frontend && npm install",
-    "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "build": "npm run build --workspace=frontend",
+    "start": "npm start --workspace=backend"
   },
   "engines": {
     "node": ">=18.0.0"
