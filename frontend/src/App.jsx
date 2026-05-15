@@ -590,6 +590,145 @@ const AuthModal = ({ isOpen, onClose, onAdminLogin, onUserLogin }) => {
   );
 };
 
+const CheckoutModal = ({ isOpen, onClose, onConfirm, total }) => {
+  const [address, setAddress] = useState({
+    plotNo: '',
+    street: '',
+    city: '',
+    state: '',
+    pincode: '',
+    phone: ''
+  });
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onConfirm(address);
+  };
+
+  return (
+    <div className="modal-overlay" style={{ zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="modal-content" 
+        style={{ maxWidth: '500px', padding: '32px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}
+      >
+        <button className="modal-close" onClick={onClose} style={{ top: '20px', right: '20px' }}><X size={24} /></button>
+        <h2 style={{ fontSize: '1.75rem', marginBottom: '8px', color: '#0f172a', fontFamily: "'Playfair Display', serif" }}>Delivery Details</h2>
+        <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '0.95rem' }}>Provide your shipping address to complete the order.</p>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Plot / Door No.</label>
+              <input 
+                type="text" 
+                required 
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                value={address.plotNo} 
+                onChange={e => setAddress({...address, plotNo: e.target.value})}
+                placeholder="e.g. 12/A"
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Phone Number</label>
+              <input 
+                type="tel" 
+                required 
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                value={address.phone} 
+                onChange={e => setAddress({...address, phone: e.target.value})}
+                placeholder="Mobile Number"
+              />
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Street Address</label>
+            <input 
+              type="text" 
+              required 
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+              value={address.street} 
+              onChange={e => setAddress({...address, street: e.target.value})}
+              placeholder="e.g. MG Road, Area Name"
+            />
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>City</label>
+              <input 
+                type="text" 
+                required 
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                value={address.city} 
+                onChange={e => setAddress({...address, city: e.target.value})}
+                placeholder="City"
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>State</label>
+              <input 
+                type="text" 
+                required 
+                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+                value={address.state} 
+                onChange={e => setAddress({...address, state: e.target.value})}
+                placeholder="State"
+              />
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Pincode</label>
+            <input 
+              type="text" 
+              required 
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
+              value={address.pincode} 
+              onChange={e => setAddress({...address, pincode: e.target.value})}
+              placeholder="6-digit Pincode"
+            />
+          </div>
+
+          <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', border: '1px solid #fde68a' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.95rem' }}>
+                <span style={{ color: '#92400e', fontWeight: '600' }}>Order Total:</span>
+                <span style={{ fontWeight: '800', color: '#92400e' }}>₹{total.toLocaleString()}</span>
+             </div>
+             <p style={{ fontSize: '0.75rem', color: '#b45309', margin: 0 }}>This will open WhatsApp to share your order & address.</p>
+          </div>
+          
+          <button type="submit" style={{ 
+            marginTop: '8px', 
+            padding: '16px', 
+            borderRadius: '12px', 
+            background: '#f59e0b', 
+            color: 'white', 
+            border: 'none', 
+            fontWeight: '700', 
+            fontSize: '1rem', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={e => e.currentTarget.style.background = '#d97706'}
+          onMouseOut={e => e.currentTarget.style.background = '#f59e0b'}
+          >
+            Send Order on WhatsApp <ArrowRight size={20} />
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
 const AccountModal = ({ isOpen, onClose, currentUser, products }) => {
   if (!isOpen || !currentUser) return null;
 
@@ -3730,6 +3869,8 @@ function App() {
   }, [products, selectedProductView]);
 
   const [loading, setLoading] = useState(products.length === 0);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [pendingCheckoutItems, setPendingCheckoutItems] = useState([]);
 
   useEffect(() => {
     if (currentUser) {
@@ -3835,40 +3976,49 @@ function App() {
 
     if (items.length === 0) return;
 
-    const deliveryAddress = window.prompt("Please enter your complete delivery address for shipping:");
-    if (!deliveryAddress || deliveryAddress.trim() === "") {
-      alert("Delivery address is required to proceed with the order.");
-      return;
-    }
+    setPendingCheckoutItems(items);
+    setIsCheckoutModalOpen(true);
+  };
 
+  const confirmCheckout = (addressDetails) => {
     const whatsappNumber = "918883888907";
     let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
     message += `*Customer Details:*\n`;
     message += `Name: ${currentUser.fullName}\n`;
     message += `Email: ${currentUser.email}\n`;
-    message += `*Delivery Address:* ${deliveryAddress}\n\n`;
+    message += `Phone: ${addressDetails.phone}\n\n`;
+
+    message += `*Delivery Address:*\n`;
+    message += `Plot/Door No: ${addressDetails.plotNo}\n`;
+    message += `Street: ${addressDetails.street}\n`;
+    message += `City: ${addressDetails.city}\n`;
+    message += `State: ${addressDetails.state}\n`;
+    message += `Pincode: ${addressDetails.pincode}\n\n`;
+
     message += `*Order Items:*\n`;
 
     let subtotal = 0;
-    items.forEach((item, index) => {
+    pendingCheckoutItems.forEach((item, index) => {
       const itemTotal = item.product.price * item.quantity;
       subtotal += itemTotal;
       message += `${index + 1}. *${item.product.name}*\n`;
-      message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal}\n`;
+      message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal.toLocaleString()}\n`;
       if (item.product.image) {
-        message += `   Image: ${item.product.image}\n`;
+        message += `   📸 View Image: ${item.product.image}\n`;
       }
+      message += `\n`;
     });
 
     const deliveryFee = subtotal >= 999 ? 0 : 99;
     const total = subtotal + deliveryFee;
 
-    message += `\n*Order Summary:*\n`;
+    message += `*Order Summary:*\n`;
     message += `Subtotal: ₹${subtotal.toLocaleString()}\n`;
     message += `Delivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\n`;
     message += `*Total Amount: ₹${total.toLocaleString()}*\n\n`;
     message += `Hi! I would like to place this order. Please confirm and share payment details.`;
 
+    setIsCheckoutModalOpen(false);
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -4112,6 +4262,16 @@ function App() {
         onClose={() => setIsAccountModalOpen(false)}
         currentUser={currentUser}
         products={products}
+      />
+
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        onConfirm={confirmCheckout}
+        total={(() => {
+          const sub = pendingCheckoutItems.reduce((s, i) => s + (i.product.price * i.quantity), 0);
+          return sub + (sub >= 999 ? 0 : 99);
+        })()}
       />
 
       <AnimatePresence>
