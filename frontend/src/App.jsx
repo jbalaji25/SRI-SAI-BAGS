@@ -1713,8 +1713,8 @@ const WishlistPage = ({ products, currentUser, loading, onProductClick, onBack, 
   });
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)', paddingTop: '100px' }}>
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '60px 0 40px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)' }}>
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '160px 0 40px' }}>
         <div className="container">
           <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px 16px', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer', marginBottom: '24px' }}>
             <ChevronLeft size={18} /> Back to Home
@@ -1785,8 +1785,8 @@ const CartPage = ({ products, currentUser, loading, onProductClick, onBack, onRe
   const total = subtotal + deliveryFee;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)', paddingTop: '100px' }}>
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '60px 0 40px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)' }}>
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', padding: '160px 0 40px' }}>
         <div className="container">
           <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px 16px', fontWeight: '600', fontSize: '0.875rem', cursor: 'pointer', marginBottom: '24px' }}>
             <ChevronLeft size={18} /> Back to Home
@@ -1891,9 +1891,9 @@ const CategoryPage = ({ category, products, loading, onProductClick, onBack, onL
     });
 
   return (
-    <div className="collection-bg" style={{ minHeight: '100vh', paddingTop: '100px' }}>
+    <div className="collection-bg" style={{ minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(245,158,11,0.15)', padding: '60px 0 40px' }}>
+      <div style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(245,158,11,0.15)', padding: '160px 0 40px' }}>
         <div className="container">
           <button
             onClick={onBack}
