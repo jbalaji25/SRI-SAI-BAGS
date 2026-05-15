@@ -3980,35 +3980,35 @@ function App() {
     setIsCheckoutModalOpen(true);
   };
 
-  const confirmCheckout = async (addressDetails) => {
+  const confirmCheckout = (addressDetails) => {
     const whatsappNumber = "918883888907";
+    
+    // We'll use the first item's image as the primary preview image for the order
+    const primaryImage = pendingCheckoutItems[0]?.product?.image;
+
     let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
+    
+    if (primaryImage) {
+      message += `${primaryImage}\n\n`; // Putting the image URL at the top helps WhatsApp unfurl the preview
+    }
+
     message += `*Customer Details:*\n`;
     message += `Name: ${currentUser.fullName}\n`;
     message += `Email: ${currentUser.email}\n`;
     message += `Phone: ${addressDetails.phone}\n\n`;
 
     message += `*Delivery Address:*\n`;
-    message += `Plot/Door No: ${addressDetails.plotNo}\n`;
-    message += `Street: ${addressDetails.street}\n`;
-    message += `City: ${addressDetails.city}\n`;
-    message += `State: ${addressDetails.state}\n`;
-    message += `Pincode: ${addressDetails.pincode}\n\n`;
+    message += `${addressDetails.plotNo}, ${addressDetails.street}\n`;
+    message += `${addressDetails.city}, ${addressDetails.state} - ${addressDetails.pincode}\n\n`;
 
     message += `*Order Items:*\n`;
 
     let subtotal = 0;
-    const imageLinks = [];
-    
     pendingCheckoutItems.forEach((item, index) => {
       const itemTotal = item.product.price * item.quantity;
       subtotal += itemTotal;
       message += `${index + 1}. *${item.product.name}*\n`;
       message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal.toLocaleString()}\n`;
-      if (item.product.image) {
-        message += `   View Image: ${item.product.image}\n`;
-        imageLinks.push(item.product.image);
-      }
       message += `\n`;
     });
 
@@ -4021,38 +4021,9 @@ function App() {
     message += `*Total Amount: ₹${total.toLocaleString()}*\n\n`;
     message += `Hi! I would like to place this order. Please confirm and share payment details.`;
 
-    // Attempt to use the Web Share API (best for mobile to send actual files)
-    const canShareFiles = navigator.canShare && navigator.share;
-    
-    if (canShareFiles && imageLinks.length > 0) {
-      try {
-        const files = [];
-        // Only try to share the first 3 images to avoid payload limits
-        for (const url of imageLinks.slice(0, 3)) {
-          const resp = await fetch(url, { mode: 'cors' });
-          const blob = await resp.blob();
-          const ext = url.split('.').pop().split('?')[0] || 'jpg';
-          files.push(new File([blob], `order-item.${ext}`, { type: blob.type }));
-        }
-
-        if (navigator.canShare({ files })) {
-          await navigator.share({
-            files,
-            text: message,
-            title: 'Sri Sai Bags Order'
-          });
-          setIsCheckoutModalOpen(false);
-          return;
-        }
-      } catch (err) {
-        console.error("Web Share failed, falling back to link:", err);
-      }
-    }
-
-    // Fallback: Open WhatsApp with pre-filled text
-    // Note: Standard links cannot "attach" image files directly; they only show links.
     setIsCheckoutModalOpen(false);
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const goHome = () => {
