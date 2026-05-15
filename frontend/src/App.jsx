@@ -3982,24 +3982,18 @@ function App() {
 
   const confirmCheckout = (addressDetails) => {
     const whatsappNumber = "918883888907";
-    
-    // We'll use the first item's image as the primary preview image for the order
-    const primaryImage = pendingCheckoutItems[0]?.product?.image;
-
     let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
-    
-    if (primaryImage) {
-      message += `${primaryImage}\n\n`; // Putting the image URL at the top helps WhatsApp unfurl the preview
-    }
-
     message += `*Customer Details:*\n`;
     message += `Name: ${currentUser.fullName}\n`;
     message += `Email: ${currentUser.email}\n`;
     message += `Phone: ${addressDetails.phone}\n\n`;
 
     message += `*Delivery Address:*\n`;
-    message += `${addressDetails.plotNo}, ${addressDetails.street}\n`;
-    message += `${addressDetails.city}, ${addressDetails.state} - ${addressDetails.pincode}\n\n`;
+    message += `Plot/Door No: ${addressDetails.plotNo}\n`;
+    message += `Street: ${addressDetails.street}\n`;
+    message += `City: ${addressDetails.city}\n`;
+    message += `State: ${addressDetails.state}\n`;
+    message += `Pincode: ${addressDetails.pincode}\n\n`;
 
     message += `*Order Items:*\n`;
 
@@ -4009,6 +4003,9 @@ function App() {
       subtotal += itemTotal;
       message += `${index + 1}. *${item.product.name}*\n`;
       message += `   Qty: ${item.quantity} × ₹${item.product.price} = ₹${itemTotal.toLocaleString()}\n`;
+      if (item.product.image) {
+        message += `   📸 View Image: ${item.product.image}\n`;
+      }
       message += `\n`;
     });
 
@@ -4022,8 +4019,7 @@ function App() {
     message += `Hi! I would like to place this order. Please confirm and share payment details.`;
 
     setIsCheckoutModalOpen(false);
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const goHome = () => {
