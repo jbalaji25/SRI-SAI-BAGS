@@ -143,7 +143,7 @@ const AngledCard = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative h-full w-full overflow-hidden border border-white/10 shadow-2xl rounded-2xl"
-           style={{ backgroundColor: 'var(--bg-accent)', minHeight: '300px' }}>
+        style={{ backgroundColor: 'var(--bg-accent)', minHeight: '300px' }}>
         <img
           src={item.url}
           alt={item.alt || "Slider Image"}
@@ -321,9 +321,7 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, onAboutClick, cur
             style={{ cursor: 'pointer' }}
             className="brand-wrapper"
           >
-            <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '50px', width: 'auto' }} />
-            <span className="brand-sri-sai">SRI SAI</span>
-            <span className="brand-gifts">BAGS</span>
+            <img src="/images/logo.png" alt="Sri Sai Gifts Logo" style={{ height: '50px', width: 'auto' }} />
           </div>
 
           <div className="nav-links">
@@ -340,10 +338,10 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, onAboutClick, cur
                 <Heart className="action-icon" size={20} style={{ color: likedCount > 0 ? '#ef4444' : '#0f172a' }} />
                 {likedCount > 0 && <span className="cart-badge" style={{ background: '#ef4444' }}>{likedCount}</span>}
               </div>
-              <motion.div 
-                onClick={onCartClick} 
+              <motion.div
+                onClick={onCartClick}
                 style={{ position: 'relative', cursor: 'pointer' }}
-                animate={cartAnimation ? { 
+                animate={cartAnimation ? {
                   scale: [1, 1.3, 1],
                   rotate: [0, -10, 10, 0]
                 } : {}}
@@ -352,7 +350,7 @@ const Navbar = ({ onSignInClick, onHomeClick, onProductsClick, onAboutClick, cur
                 <ShoppingCart className="action-icon" size={20} />
                 <AnimatePresence>
                   {cartCount > 0 && (
-                    <motion.span 
+                    <motion.span
                       key="cart-badge"
                       className="cart-badge"
                       initial={{ scale: 0, opacity: 0 }}
@@ -609,108 +607,108 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total }) => {
 
   return (
     <div className="modal-overlay" style={{ zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="modal-content" 
+        className="modal-content"
         style={{ maxWidth: '500px', padding: '32px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}
       >
         <button className="modal-close" onClick={onClose} style={{ top: '20px', right: '20px' }}><X size={24} /></button>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '8px', color: '#0f172a', fontFamily: "'Playfair Display', serif" }}>Delivery Details</h2>
         <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '0.95rem' }}>Provide your shipping address to complete the order.</p>
-        
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Plot / Door No.</label>
-              <input 
-                type="text" 
-                required 
+              <input
+                type="text"
+                required
                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-                value={address.plotNo} 
-                onChange={e => setAddress({...address, plotNo: e.target.value})}
+                value={address.plotNo}
+                onChange={e => setAddress({ ...address, plotNo: e.target.value })}
                 placeholder="e.g. 12/A"
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Phone Number</label>
-              <input 
-                type="tel" 
-                required 
+              <input
+                type="tel"
+                required
                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-                value={address.phone} 
-                onChange={e => setAddress({...address, phone: e.target.value})}
+                value={address.phone}
+                onChange={e => setAddress({ ...address, phone: e.target.value })}
                 placeholder="Mobile Number"
               />
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Street Address</label>
-            <input 
-              type="text" 
-              required 
+            <input
+              type="text"
+              required
               style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-              value={address.street} 
-              onChange={e => setAddress({...address, street: e.target.value})}
+              value={address.street}
+              onChange={e => setAddress({ ...address, street: e.target.value })}
               placeholder="e.g. MG Road, Area Name"
             />
           </div>
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>City</label>
-              <input 
-                type="text" 
-                required 
+              <input
+                type="text"
+                required
                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-                value={address.city} 
-                onChange={e => setAddress({...address, city: e.target.value})}
+                value={address.city}
+                onChange={e => setAddress({ ...address, city: e.target.value })}
                 placeholder="City"
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>State</label>
-              <input 
-                type="text" 
-                required 
+              <input
+                type="text"
+                required
                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-                value={address.state} 
-                onChange={e => setAddress({...address, state: e.target.value})}
+                value={address.state}
+                onChange={e => setAddress({ ...address, state: e.target.value })}
                 placeholder="State"
               />
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>Pincode</label>
-            <input 
-              type="text" 
-              required 
+            <input
+              type="text"
+              required
               style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.95rem' }}
-              value={address.pincode} 
-              onChange={e => setAddress({...address, pincode: e.target.value})}
+              value={address.pincode}
+              onChange={e => setAddress({ ...address, pincode: e.target.value })}
               placeholder="6-digit Pincode"
             />
           </div>
 
           <div style={{ background: '#fffbeb', padding: '16px', borderRadius: '12px', border: '1px solid #fde68a' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.95rem' }}>
-                <span style={{ color: '#92400e', fontWeight: '600' }}>Order Total:</span>
-                <span style={{ fontWeight: '800', color: '#92400e' }}>₹{total.toLocaleString()}</span>
-             </div>
-             <p style={{ fontSize: '0.75rem', color: '#b45309', margin: 0 }}>This will open WhatsApp to share your order & address.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.95rem' }}>
+              <span style={{ color: '#92400e', fontWeight: '600' }}>Order Total:</span>
+              <span style={{ fontWeight: '800', color: '#92400e' }}>₹{total.toLocaleString()}</span>
+            </div>
+            <p style={{ fontSize: '0.75rem', color: '#b45309', margin: 0 }}>This will open WhatsApp to share your order & address.</p>
           </div>
-          
-          <button type="submit" style={{ 
-            marginTop: '8px', 
-            padding: '16px', 
-            borderRadius: '12px', 
-            background: '#f59e0b', 
-            color: 'white', 
-            border: 'none', 
-            fontWeight: '700', 
-            fontSize: '1rem', 
+
+          <button type="submit" style={{
+            marginTop: '8px',
+            padding: '16px',
+            borderRadius: '12px',
+            background: '#f59e0b',
+            color: 'white',
+            border: 'none',
+            fontWeight: '700',
+            fontSize: '1rem',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -718,8 +716,8 @@ const CheckoutModal = ({ isOpen, onClose, onConfirm, total }) => {
             gap: '10px',
             transition: 'all 0.2s'
           }}
-          onMouseOver={e => e.currentTarget.style.background = '#d97706'}
-          onMouseOut={e => e.currentTarget.style.background = '#f59e0b'}
+            onMouseOver={e => e.currentTarget.style.background = '#d97706'}
+            onMouseOut={e => e.currentTarget.style.background = '#f59e0b'}
           >
             Send Order on WhatsApp <ArrowRight size={20} />
           </button>
@@ -883,10 +881,13 @@ const Hero = () => {
         <motion.div
           key={currentSlide}
           className="hero-background"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, scale: 1 }}
+          animate={{ opacity: 1, scale: 1.1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.2 }}
+          transition={{
+            opacity: { duration: 1.2 },
+            scale: { duration: 6, ease: "linear" }
+          }}
           style={{ backgroundImage: `url("${slides[currentSlide].image}")` }}
         />
       </AnimatePresence>
@@ -1130,9 +1131,9 @@ const Categories = ({ onCategoryClick, products }) => {
           </div>
           <p style={{ fontSize: '1rem', color: '#64748b', maxWidth: '500px', margin: '0 auto', fontFamily: "'Outfit', sans-serif" }}>Explore our handpicked premium gift categories</p>
         </motion.div>
-        
-        <AngledSlider 
-          items={sliderItems} 
+
+        <AngledSlider
+          items={sliderItems}
           onItemClick={onCategoryClick}
           containerHeight="500px"
           cardWidth="320px"
@@ -1439,18 +1440,18 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
       onClick={() => onClick && onClick(product)}
     >
       {discountPercent > 0 && <div className="uiverse-badge">{discountPercent}% OFF</div>}
-      
-      <button 
+
+      <button
         className="uiverse-wishlist"
         onClick={(e) => {
           e.stopPropagation();
           onLikeClick && onLikeClick(product);
         }}
       >
-        <Heart 
-          size={18} 
-          fill={(product.liked || false) ? '#ef4444' : 'none'} 
-          color={(product.liked || false) ? '#ef4444' : '#94a3b8'} 
+        <Heart
+          size={18}
+          fill={(product.liked || false) ? '#ef4444' : 'none'}
+          color={(product.liked || false) ? '#ef4444' : '#94a3b8'}
         />
       </button>
 
@@ -1467,7 +1468,7 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
       </div>
 
       <div className="uiverse-actions">
-        <button 
+        <button
           className="uiverse-action-btn btn-cart"
           onClick={(e) => {
             e.stopPropagation();
@@ -1476,7 +1477,7 @@ const ProductCard = ({ product, index, onClick, onLikeClick, onCartClick }) => {
         >
           <ShoppingCart size={16} /> Cart
         </button>
-        <button 
+        <button
           className="uiverse-action-btn btn-whatsapp"
           onClick={(e) => {
             e.stopPropagation();
@@ -1970,7 +1971,7 @@ const AboutPage = ({ onBack }) => {
           transform: 'scale(1.1)', filter: 'brightness(0.4)'
         }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,23,42,0.8), transparent, rgba(15,23,42,0.9))' }} />
-        
+
         <div className="container" style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -1985,7 +1986,7 @@ const AboutPage = ({ onBack }) => {
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
               <div style={{ width: '40px', height: '2px', backgroundColor: '#f59e0b', marginTop: '12px' }} />
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', maxWidth: '600px', lineHeight: 1.5 }}>
-                At Sri Sai Bags, we craft products that don't just carry items—they carry your brand's reputation.
+                At Sri Sai Gifts, we craft products that don't just carry items—they carry your brand's reputation.
               </p>
             </div>
           </motion.div>
@@ -2033,7 +2034,7 @@ const AboutPage = ({ onBack }) => {
               <p style={{ color: '#475569', fontSize: '1.15rem', lineHeight: 1.8, marginBottom: '32px' }}>
                 We believe that every corporate gift is a silent ambassador for your business. That's why we meticulously combine modern design with industrial durability, ensuring that every bag and accessory we produce leaves a lasting mark of professionalism.
               </p>
-              
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                 {stats.map((s, i) => (
                   <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -2151,12 +2152,12 @@ const AboutPage = ({ onBack }) => {
             position: 'relative',
             overflow: 'hidden'
           }}>
-             <div style={{
+            <div style={{
               position: 'absolute', top: '-100px', right: '-100px',
               width: '300px', height: '300px', background: 'rgba(255,255,255,0.1)',
               borderRadius: '50%', filter: 'blur(80px)'
             }} />
-            
+
             <h2 style={{ fontSize: '3.5rem', fontWeight: '900', marginBottom: '32px' }}>Let's Create Something <br /> Extraordinary Together.</h2>
             <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.9)', maxWidth: '700px', margin: '0 auto 48px', lineHeight: 1.6 }}>
               From startups to global corporations, we provide products that represent your business with style, quality, and professionalism.
@@ -2241,7 +2242,7 @@ const ContactPage = ({ onBack }) => {
               </div>
             ),
             label: 'VISIT SHOWROOM',
-            title: '49, GST Road, Pasumalai',
+            title: 'No 55 A, Near Menatchi Amman Temple, West Tower Street, Madurai West, Madurai-625001, Tamil Nadu',
             sub: 'Madurai – 625 004'
           },
           {
@@ -2251,8 +2252,8 @@ const ContactPage = ({ onBack }) => {
               </div>
             ),
             label: 'CALL US',
-            title: '9626262777',
-            sub: '9626262778'
+            title: '+91 88838 88907',
+            sub: ''
           },
           {
             icon: (
@@ -2261,7 +2262,7 @@ const ContactPage = ({ onBack }) => {
               </div>
             ),
             label: 'EMAIL US',
-            title: 'wuddeninteriors',
+            title: 'srisaibags.digital',
             sub: '@gmail.com'
           },
           {
@@ -2365,7 +2366,7 @@ const ContactPage = ({ onBack }) => {
                   <label style={{ display: 'block', fontSize: '0.83rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Phone Number</label>
                   <input
                     type="tel"
-                    placeholder="+91 9626262777"
+                    placeholder="+91 88838 88907"
                     style={{
                       width: '100%', padding: '11px 14px', borderRadius: '8px', boxSizing: 'border-box',
                       border: '1.5px solid #e2e8f0', fontSize: '0.9rem', color: '#0f172a',
@@ -2446,7 +2447,7 @@ const ContactPage = ({ onBack }) => {
             {/* Google Map Embed */}
             <div style={{ borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
               <iframe
-                title="SRI SAI bags Showroom – Pasumalai, Madurai"
+                title="SRI SAI Gifts Showroom – Pasumalai, Madurai"
                 src="https://maps.google.com/maps?q=Thiruparankundram,+Madurai&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="290"
@@ -2467,8 +2468,8 @@ const ContactPage = ({ onBack }) => {
                 <MapPin size={24} color="#f59e0b" />
               </div>
               <div>
-                <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.15rem', marginBottom: '8px' }}>SRI SAI bags Showroom</h3>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>49, GST Road, Pasumalai</p>
+                <h3 style={{ color: 'white', fontWeight: '800', fontSize: '1.15rem', marginBottom: '8px' }}>SRI SAI Gifts Showroom</h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>No 55 A, Near Menatchi Amman Temple, West Tower Street, Madurai West, Madurai-625001, Tamil Nadu</p>
                 <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Madurai – 625 004, Tamil Nadu</p>
               </div>
             </div>
@@ -2529,7 +2530,7 @@ const Newsletter = () => {
   return (
     <section className="newsletter-section">
       <div className="container">
-        <motion.div 
+        <motion.div
           className="newsletter-box"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -2588,8 +2589,7 @@ const Footer = ({ onHomeClick, onProductsClick, onAboutClick, onContactClick }) 
         <div className="footer-grid">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <img src="/images/sai-bags-logo-no-bg.png" alt="Sri Sai Bags Logo" style={{ height: '40px', width: 'auto' }} />
-              <div className="brand-sri-sai" style={{ fontSize: '1.5rem' }}>SRI SAI <span style={{ fontWeight: 400, fontSize: '0.875rem' }}>bags</span></div>
+              <img src="/images/logo.png" alt="Sri Sai Gifts Logo" style={{ height: '40px', width: 'auto' }} />
             </div>
             <p style={{ color: '#94a3b8', marginBottom: '32px' }}>
               Your boutique destination for luxury gifts and exquisite accessories. Crafted with passion, delivered with love.
@@ -2597,7 +2597,7 @@ const Footer = ({ onHomeClick, onProductsClick, onAboutClick, onContactClick }) 
             <div className="social-links">
               <div className="social-icon"><Instagram size={20} /></div>
               <div className="social-icon"><Facebook size={20} /></div>
-                <div className="social-icon"><Twitter size={20} /></div>
+              <div className="social-icon"><Twitter size={20} /></div>
             </div>
           </div>
 
@@ -2626,21 +2626,23 @@ const Footer = ({ onHomeClick, onProductsClick, onAboutClick, onContactClick }) 
             <ul className="footer-links" style={{ color: '#f8fafc' }}>
               <li className="footer-link-item" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
                 <MapPin size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
-                49, GST Road, Pasumalai, Madurai-04
+                No 55 A, Near Menatchi Amman Temple, West Tower Street, Madurai West, Madurai-625001, Tamil Nadu
+
+Madurai – 625004, Tamil Nadu
               </li>
               <li className="footer-link-item" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
                 <Phone size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
-                9626262777 / 9626262778
+                +91 88838 88907
               </li>
               <li className="footer-link-item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <Mail size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
-                srisaigifts@gmail.com
+                srisaibags.digital@gmail.com
               </li>
             </ul>
           </div>
         </div>
         <div style={{ borderTop: '1px solid #334155', paddingTop: '32px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', color: '#94a3b8', fontSize: '0.875rem' }}>
-          <p>© 2024 SRI SAI bags. All rights reserved.</p>
+          <p>© 2024 SRI SAI Gifts. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '24px' }}>
             <a href="#" className="footer-link">Privacy Policy</a>
             <a href="#" className="footer-link">Terms of Service</a>
@@ -3354,9 +3356,9 @@ const AdminDashboard = ({ onLogout, products, setProducts }) => {
                             const configured = categoryStructure[mainName] || [];
                             const normalizedMain = mainName.toLowerCase().trim();
                             const productsInCat = products.filter(p => {
-                                const m = (p.mainCategory || '').toLowerCase().trim();
-                                const c = p.category ? getMainCategoryForSub(p.category).toLowerCase().trim() : '';
-                                return m === normalizedMain || c === normalizedMain;
+                              const m = (p.mainCategory || '').toLowerCase().trim();
+                              const c = p.category ? getMainCategoryForSub(p.category).toLowerCase().trim() : '';
+                              return m === normalizedMain || c === normalizedMain;
                             });
                             const dynamic = productsInCat.map(p => p.category ? p.category.trim() : `Other ${mainName}`);
                             const allOptions = [...new Set([...configured, ...dynamic])].filter(Boolean);
@@ -3631,10 +3633,10 @@ const ProductsPage = ({ products, currentUser, onProductClick, onCartClick, onLi
                   subCats = [...new Set(productsInThisMain.map(p => p.category ? p.category.trim() : `Other ${cat}`))].filter(Boolean);
                 }
                 const isActiveMain = selectedCategory === cat || (subCats && subCats.includes(selectedCategory));
-                
+
                 // Hide main categories that have 0 products (optional, but requested for subcategories)
                 // We'll focus just on hiding the empty subcategories as requested.
-                
+
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <button
@@ -3742,7 +3744,7 @@ const ProductsPage = ({ products, currentUser, onProductClick, onCartClick, onLi
 
               // Group products by subcategory if a main category is selected
               const isMainCategorySelected = Object.keys(categoryStructure).includes(selectedCategory);
-              
+
               if (isMainCategorySelected && selectedCategory !== "All") {
                 const groupedProducts = {};
                 displayProducts.forEach(product => {
@@ -3982,7 +3984,7 @@ function App() {
 
   const confirmCheckout = (addressDetails) => {
     const whatsappNumber = "918883888907";
-    let message = `*New Order from Sri Sai Bags* 🛍️\n\n`;
+    let message = `*New Order from Sri Sai Gifts* 🛍️\n\n`;
     message += `*Customer Details:*\n`;
     message += `Name: ${currentUser.fullName}\n`;
     message += `Email: ${currentUser.email}\n`;
@@ -4223,8 +4225,8 @@ function App() {
       ) : (
         <>
           <Hero />
-          <Features />
           <Categories onCategoryClick={setSelectedCategory} products={products} />
+          <Features />
           <FeaturedProducts
             products={products.map(p => ({
               ...p,
